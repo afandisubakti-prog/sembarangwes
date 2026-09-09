@@ -13,6 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Data Sentral">
+
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { height:100%; overflow:hidden; touch-action:pan-y; background:#F2F4F7; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
@@ -22,18 +23,61 @@
   .topbar {
     min-height:56px;
     padding-top:max(16px, env(safe-area-inset-top));
-    padding-bottom:14px;
+    padding-bottom:10px;
     background:#FFFFFF;
     border-bottom:1px solid #E4E7EB;
     box-shadow:0 1px 3px rgba(20,30,40,0.04);
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
     flex-shrink:0;
   }
   .topbar span { font-size:1.05rem; font-weight:800; letter-spacing:0.01em; color:#12161A; }
+  .dots { display:flex; gap:5px; margin-top:7px; }
+  .dots i { width:5px; height:5px; border-radius:50%; background:#D3D8DD; transition:background .2s ease, width .2s ease; }
+  .dots i.on { background:#1362C4; width:14px; border-radius:3px; }
 
-  .list { flex:1; overflow-y:auto; padding:16px 14px 26px; -webkit-overflow-scrolling:touch; }
+  #installBar {
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin:12px 14px 0;
+    padding:12px 14px;
+    border-radius:14px;
+    background:#12161A;
+    box-shadow:0 4px 12px rgba(0,0,0,0.18);
+    flex-shrink:0;
+  }
+  #installBar span { color:#fff; font-size:0.88rem; font-weight:600; }
+  #installBar button {
+    background:#29A0F0; color:#fff; border:none;
+    padding:9px 16px; border-radius:10px;
+    font-size:0.86rem; font-weight:700;
+    flex-shrink:0;
+  }
+  #iosTip {
+    display:none;
+    margin:12px 14px 0;
+    padding:12px 14px;
+    border-radius:14px;
+    background:#FFF4D6;
+    color:#7A5B00;
+    font-size:0.84rem;
+    font-weight:600;
+    line-height:1.4;
+    flex-shrink:0;
+  }
+
+  #pagesViewport { flex:1; overflow:hidden; position:relative; }
+  #pagesTrack {
+    height:100%;
+    width:200%;
+    display:flex;
+    transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menuPage { width:50%; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 14px 100px; }
 
   .menu-item {
     position:relative;
@@ -45,6 +89,10 @@
     background:linear-gradient(135deg, #29A0F0, #1362C4);
     box-shadow:0 6px 14px rgba(19,98,196,0.28);
     transition:transform .12s ease, background .12s ease, box-shadow .12s ease;
+  }
+  .menu-item.green {
+    background:linear-gradient(135deg, #34D399, #047857);
+    box-shadow:0 6px 14px rgba(4,120,87,0.28);
   }
   .menu-item:active {
     transform:scale(0.965);
@@ -65,37 +113,33 @@
   .name { color:#FFFFFF; font-size:1.0rem; font-weight:700; line-height:1.25; }
   .sub { color:rgba(255,255,255,0.86); font-size:0.83rem; font-weight:500; margin-top:2px; }
 
-  .chev { color:rgba(255,255,255,0.65); font-size:1.3rem; margin-left:8px; flex-shrink:0; }
-
-  /* Banner instal aplikasi */
-  #installBar {
-    display:none;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    margin:0 14px 14px;
-    padding:12px 14px;
-    border-radius:14px;
-    background:#12161A;
-    box-shadow:0 4px 12px rgba(0,0,0,0.18);
+  /* Tombol Leaderboard mengambang */
+  #leaderboardBtn {
+    position:fixed;
+    right:16px;
+    bottom:calc(max(16px, env(safe-area-inset-bottom)) + 6px);
+    width:74px; height:74px;
+    border-radius:50%;
+    z-index:4;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 32% 26%, #FF7A6E 0%, #E8382B 42%, #931710 100%);
+    box-shadow:0 10px 20px rgba(147,23,16,0.4), inset 0 -7px 10px rgba(0,0,0,0.28), inset 0 6px 8px rgba(255,255,255,0.28);
+    transition:transform .15s ease;
+    overflow:hidden;
   }
-  #installBar span { color:#fff; font-size:0.88rem; font-weight:600; }
-  #installBar button {
-    background:#29A0F0; color:#fff; border:none;
-    padding:9px 16px; border-radius:10px;
-    font-size:0.86rem; font-weight:700;
-    flex-shrink:0;
-  }
-  #iosTip {
-    display:none;
-    margin:0 14px 14px;
-    padding:12px 14px;
-    border-radius:14px;
-    background:#FFF4D6;
-    color:#7A5B00;
-    font-size:0.84rem;
-    font-weight:600;
-    line-height:1.4;
+  #leaderboardBtn:active { transform:scale(0.93); }
+  .lb-lines { position:absolute; inset:0; transition:transform .34s cubic-bezier(0.22, 1, 0.36, 1); }
+  .lb-lines svg { width:100%; height:100%; }
+  .lb-text {
+    position:relative; z-index:2;
+    width:56px;
+    color:#fff;
+    font-size:8.6px;
+    font-weight:800;
+    letter-spacing:-0.2px;
+    text-align:center;
+    line-height:1.05;
+    text-shadow:0 1px 2px rgba(0,0,0,0.45);
   }
 
   /* Halaman detail (placeholder abu-abu) */
@@ -132,7 +176,10 @@
 <body>
 
   <div id="home">
-    <div class="topbar"><span>Data Sentral</span></div>
+    <div class="topbar">
+      <span>Data Sentral</span>
+      <div class="dots"><i class="d on"></i><i class="d"></i></div>
+    </div>
 
     <div id="installBar">
       <span>Instal aplikasi ini ke HP-mu</span>
@@ -140,44 +187,94 @@
     </div>
     <div id="iosTip">Tap ikon Share (kotak dengan panah ke atas) di bagian bawah Safari, lalu pilih "Add to Home Screen" untuk memasang aplikasi ini.</div>
 
-    <div class="list">
+    <div id="pagesViewport">
+      <div id="pagesTrack">
 
-      <div class="menu-item" data-target="Coal Handling Facility" onclick="openDetail(this)">
-        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l6 3V10l6 3V10l6 3v8H3z"/><path d="M3 21h18"/></svg></div>
-        <div class="txtwrap"><div class="name">Coal Handling Facility</div><div class="sub">PKU : 95%</div></div>
+        <!-- Halaman 1 -->
+        <div class="menuPage">
+          <div class="menu-item" data-target="Coal Handling Facility" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l6 3V10l6 3V10l6 3v8H3z"/><path d="M3 21h18"/></svg></div>
+            <div class="txtwrap"><div class="name">Coal Handling Facility</div><div class="sub">PKU : 95%</div></div>
+          </div>
+
+          <div class="menu-item" data-target="Ash Handling Facility" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h9a3 3 0 100-6H8"/><path d="M3 17h13a3 3 0 110 6"/></svg></div>
+            <div class="txtwrap"><div class="name">Ash Handling Facility</div><div class="sub">PKU : 89%</div></div>
+          </div>
+
+          <div class="menu-item" data-target="Compressor" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="7" rx="3.5"/><rect x="6" y="6" width="5" height="3" rx="0.8"/><circle cx="16" cy="7" r="2.3"/><path d="M16 5.6v1.4l1 0.7"/><circle cx="6" cy="19" r="1.6"/></svg></div>
+            <div class="txtwrap"><div class="name">Compressor</div><div class="sub">PKU : 92%</div></div>
+          </div>
+
+          <div class="menu-item" data-target="Peta Coalyard" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v16l-6 2-6-2-6 2V6z"/><path d="M9 4v16M15 6v16"/></svg></div>
+            <div class="txtwrap"><div class="name">Peta Coalyard</div><div class="sub">Real-Time Coalyard Monitoring</div></div>
+          </div>
+
+          <div class="menu-item" data-target="Line-Up Tongkang" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h18l-2 4H5l-2-4z"/><path d="M7 14V9h6v5"/><rect x="9" y="6" width="2.4" height="3" rx="0.5"/><circle cx="9" cy="11.5" r="0.5" fill="#fff" stroke="none"/><circle cx="11" cy="11.5" r="0.5" fill="#fff" stroke="none"/><path d="M2 19c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0"/></svg></div>
+            <div class="txtwrap"><div class="name">Line-Up Tongkang</div><div class="sub">Status &amp; Progres Pembongkaran</div></div>
+          </div>
+
+          <div class="menu-item" data-target="Pola Loading" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+            <div class="txtwrap"><div class="name">Pola Loading</div><div class="sub">Komposisi Batubara Bunker</div></div>
+          </div>
+
+          <div class="menu-item" data-target="Ketidaknormalan Peralatan" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4M12 17v.01"/></svg></div>
+            <div class="txtwrap"><div class="name">Ketidaknormalan Peralatan</div><div class="sub">Monitoring Kondisi Peralatan</div></div>
+          </div>
+        </div>
+
+        <!-- Halaman 2 -->
+        <div class="menuPage">
+          <div class="menu-item green" data-target="IK Coal Handling" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v3h6V3"/><path d="M8.5 11h7M8.5 15h4.5"/></svg></div>
+            <div class="txtwrap"><div class="name">IK Coal Handling</div></div>
+          </div>
+
+          <div class="menu-item green" data-target="IK Ash Handling" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v3h6V3"/><path d="M8.5 11h7M8.5 15h4.5"/></svg></div>
+            <div class="txtwrap"><div class="name">IK Ash Handling</div></div>
+          </div>
+
+          <div class="menu-item green" data-target="Manual Book" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 016.5 2H20v17H6.5A2.5 2.5 0 004 21.5v-17z"/><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/></svg></div>
+            <div class="txtwrap"><div class="name">Manual Book</div></div>
+          </div>
+
+          <div class="menu-item green" data-target="P&ID" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M8 6h8M7.4 7.6L11 16.4M16.6 7.6L13 16.4"/></svg></div>
+            <div class="txtwrap"><div class="name">P&amp;ID</div><div class="sub">Piping and Instrumentation Diagram</div></div>
+          </div>
+
+          <div class="menu-item green" data-target="KSF" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M8 11l8-4M8 13l8 4"/></svg></div>
+            <div class="txtwrap"><div class="name">KSF</div><div class="sub">Knowledge Sharing</div></div>
+          </div>
+
+          <div class="menu-item green" data-target="OCEA" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4L21 21"/><path d="M10.5 7.5v4M10.5 13.5v.01"/></svg></div>
+            <div class="txtwrap"><div class="name">OCEA</div><div class="sub">Operation Critical Effect Analysis</div></div>
+          </div>
+        </div>
+
       </div>
-
-      <div class="menu-item" data-target="Ash Handling Facility" onclick="openDetail(this)">
-        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h9a3 3 0 100-6H8"/><path d="M3 17h13a3 3 0 110 6"/></svg></div>
-        <div class="txtwrap"><div class="name">Ash Handling Facility</div><div class="sub">PKU : 89%</div></div>
-      </div>
-
-      <div class="menu-item" data-target="Compressor" onclick="openDetail(this)">
-        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="7" rx="3.5"/><rect x="6" y="6" width="5" height="3" rx="0.8"/><circle cx="16" cy="7" r="2.3"/><path d="M16 5.6v1.4l1 0.7"/><circle cx="6" cy="19" r="1.6"/></svg></div>
-        <div class="txtwrap"><div class="name">Compressor</div><div class="sub">PKU : 92%</div></div>
-      </div>
-
-      <div class="menu-item" data-target="Peta Coalyard" onclick="openDetail(this)">
-        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v16l-6 2-6-2-6 2V6z"/><path d="M9 4v16M15 6v16"/></svg></div>
-        <div class="txtwrap"><div class="name">Peta Coalyard</div><div class="sub">Real-Time Coalyard Monitoring</div></div>
-      </div>
-
-      <div class="menu-item" data-target="Line-Up Tongkang" onclick="openDetail(this)">
-        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h18l-2 4H5l-2-4z"/><path d="M7 14V9h6v5"/><rect x="9" y="6" width="2.4" height="3" rx="0.5"/><circle cx="9" cy="11.5" r="0.5" fill="#fff" stroke="none"/><circle cx="11" cy="11.5" r="0.5" fill="#fff" stroke="none"/><path d="M2 19c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0"/></svg></div>
-        <div class="txtwrap"><div class="name">Line-Up Tongkang</div><div class="sub">Status &amp; Progres Pembongkaran</div></div>
-      </div>
-
-      <div class="menu-item" data-target="Pola Loading" onclick="openDetail(this)">
-        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
-        <div class="txtwrap"><div class="name">Pola Loading</div><div class="sub">Komposisi Batubara Bunker</div></div>
-      </div>
-
-      <div class="menu-item" data-target="Ketidaknormalan Peralatan" onclick="openDetail(this)">
-        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4M12 17v.01"/></svg></div>
-        <div class="txtwrap"><div class="name">Ketidaknormalan Peralatan</div><div class="sub">Monitoring Kondisi Peralatan</div></div>
-      </div>
-
     </div>
+  </div>
+
+  <div id="leaderboardBtn" data-target="LEADERBOARD" onclick="openDetail(this)">
+    <div class="lb-lines" id="lbLines">
+      <svg viewBox="0 0 74 74">
+        <ellipse cx="37" cy="37" rx="35" ry="12" fill="none" stroke="rgba(0,0,0,0.38)" stroke-width="1.4"/>
+        <ellipse cx="37" cy="37" rx="35" ry="22" fill="none" stroke="rgba(0,0,0,0.32)" stroke-width="1.3" transform="rotate(45 37 37)"/>
+        <ellipse cx="37" cy="37" rx="35" ry="22" fill="none" stroke="rgba(0,0,0,0.32)" stroke-width="1.3" transform="rotate(-45 37 37)"/>
+        <ellipse cx="37" cy="37" rx="13" ry="35" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="1.3"/>
+      </svg>
+    </div>
+    <div class="lb-text">LEADERBOARD</div>
   </div>
 
   <div id="detail">
@@ -197,10 +294,75 @@
       document.getElementById('detail').classList.remove('active');
     }
 
+    // Swipe antar halaman menu
+    var viewport = document.getElementById('pagesViewport');
+    var track = document.getElementById('pagesTrack');
+    var lbLines = document.getElementById('lbLines');
+    var dotsEls = document.querySelectorAll('.dots .d');
+    var totalPages = 2;
+    var current = 0;
+    var lbAngle = 0;
+    var startX = 0, startY = 0, dx = 0, dragging = false;
+    var w = viewport.clientWidth;
+
+    function renderTrack(withTransition) {
+      track.style.transition = withTransition ? 'transform 0.34s cubic-bezier(0.22, 1, 0.36, 1)' : 'none';
+      track.style.transform = 'translateX(' + (-current * w) + 'px)';
+      dotsEls.forEach(function(d, i){ d.classList.toggle('on', i === current); });
+    }
+
+    function spinLeaderboard() {
+      lbLines.style.transform = 'rotate(' + lbAngle + 'deg)';
+    }
+
+    function goNext() {
+      if (current < totalPages - 1) { current++; lbAngle += 55; }
+      renderTrack(true); spinLeaderboard();
+    }
+    function goPrev() {
+      if (current > 0) { current--; lbAngle -= 55; }
+      renderTrack(true); spinLeaderboard();
+    }
+
+    window.addEventListener('resize', function() {
+      w = viewport.clientWidth;
+      renderTrack(false);
+    });
+
+    viewport.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      dx = 0; dragging = true;
+    }, { passive: true });
+
+    viewport.addEventListener('touchmove', function(e) {
+      if (!dragging) return;
+      var curX = e.touches[0].clientX;
+      var curY = e.touches[0].clientY;
+      dx = curX - startX;
+      if (Math.abs(dx) > Math.abs(curY - startY)) {
+        track.style.transition = 'none';
+        track.style.transform = 'translateX(' + (-current * w + dx) + 'px)';
+      }
+    }, { passive: true });
+
+    viewport.addEventListener('touchend', function() {
+      dragging = false;
+      var threshold = w * 0.15;
+      if (dx < -threshold) {
+        goNext(); // usap kiri = halaman berikutnya
+      } else if (dx > threshold) {
+        goPrev(); // usap kanan = kembali ke halaman sebelumnya
+      } else {
+        renderTrack(true);
+      }
+    });
+
+    renderTrack(false);
+
     // Deteksi apakah sudah berjalan sebagai aplikasi terinstal
     var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-    // Android/Chrome: tampilkan tombol instal
     var deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', function(e) {
       e.preventDefault();
@@ -219,7 +381,6 @@
       document.getElementById('installBar').style.display = 'none';
     });
 
-    // iPhone/Safari: tidak ada prompt otomatis, tampilkan petunjuk manual
     var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     if (isIOS && !isStandalone) {
       document.getElementById('iosTip').style.display = 'block';
