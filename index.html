@@ -20,7 +20,9 @@
   #home { height:100%; display:flex; flex-direction:column; background:#F2F4F7; }
 
   .topbar {
-    height:60px;
+    min-height:56px;
+    padding-top:max(16px, env(safe-area-inset-top));
+    padding-bottom:14px;
     background:#FFFFFF;
     border-bottom:1px solid #E4E7EB;
     box-shadow:0 1px 3px rgba(20,30,40,0.04);
@@ -107,17 +109,22 @@
   }
   #detail.active { transform:translateY(0); }
   .dtop {
-    height:60px; background:#FFFFFF;
+    min-height:56px; background:#FFFFFF;
     display:flex; align-items:center;
-    padding:0 8px;
+    padding:max(12px, env(safe-area-inset-top)) 8px 12px;
     border-bottom:1px solid #DCE0E4;
     flex-shrink:0;
   }
   .back {
-    width:38px; height:38px;
+    width:36px; height:36px;
+    border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    font-size:1.4rem; color:#1362C4;
+    background:#F1F3F5;
+    margin-right:12px;
+    transition:background .15s ease, transform .15s ease;
   }
+  .back:active { background:#E4E7EB; transform:scale(0.92); }
+  .back svg { width:18px; height:18px; }
   .dtitle { font-weight:800; font-size:1.0rem; color:#12161A; }
   .dbody { flex:1; }
 </style>
@@ -138,43 +145,36 @@
       <div class="menu-item" data-target="Coal Handling Facility" onclick="openDetail(this)">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l6 3V10l6 3V10l6 3v8H3z"/><path d="M3 21h18"/></svg></div>
         <div class="txtwrap"><div class="name">Coal Handling Facility</div><div class="sub">PKU : 95%</div></div>
-        <div class="chev">›</div>
       </div>
 
       <div class="menu-item" data-target="Ash Handling Facility" onclick="openDetail(this)">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h9a3 3 0 100-6H8"/><path d="M3 17h13a3 3 0 110 6"/></svg></div>
         <div class="txtwrap"><div class="name">Ash Handling Facility</div><div class="sub">PKU : 89%</div></div>
-        <div class="chev">›</div>
       </div>
 
       <div class="menu-item" data-target="Compressor" onclick="openDetail(this)">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="7" rx="3.5"/><rect x="6" y="6" width="5" height="3" rx="0.8"/><circle cx="16" cy="7" r="2.3"/><path d="M16 5.6v1.4l1 0.7"/><circle cx="6" cy="19" r="1.6"/></svg></div>
         <div class="txtwrap"><div class="name">Compressor</div><div class="sub">PKU : 92%</div></div>
-        <div class="chev">›</div>
       </div>
 
       <div class="menu-item" data-target="Peta Coalyard" onclick="openDetail(this)">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v16l-6 2-6-2-6 2V6z"/><path d="M9 4v16M15 6v16"/></svg></div>
         <div class="txtwrap"><div class="name">Peta Coalyard</div><div class="sub">Real-Time Coalyard Monitoring</div></div>
-        <div class="chev">›</div>
       </div>
 
       <div class="menu-item" data-target="Line-Up Tongkang" onclick="openDetail(this)">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h18l-2 4H5l-2-4z"/><path d="M7 14V9h6v5"/><rect x="9" y="6" width="2.4" height="3" rx="0.5"/><circle cx="9" cy="11.5" r="0.5" fill="#fff" stroke="none"/><circle cx="11" cy="11.5" r="0.5" fill="#fff" stroke="none"/><path d="M2 19c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0"/></svg></div>
         <div class="txtwrap"><div class="name">Line-Up Tongkang</div><div class="sub">Status &amp; Progres Pembongkaran</div></div>
-        <div class="chev">›</div>
       </div>
 
       <div class="menu-item" data-target="Pola Loading" onclick="openDetail(this)">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
         <div class="txtwrap"><div class="name">Pola Loading</div><div class="sub">Komposisi Batubara Bunker</div></div>
-        <div class="chev">›</div>
       </div>
 
       <div class="menu-item" data-target="Ketidaknormalan Peralatan" onclick="openDetail(this)">
         <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4M12 17v.01"/></svg></div>
         <div class="txtwrap"><div class="name">Ketidaknormalan Peralatan</div><div class="sub">Monitoring Kondisi Peralatan</div></div>
-        <div class="chev">›</div>
       </div>
 
     </div>
@@ -182,7 +182,7 @@
 
   <div id="detail">
     <div class="dtop">
-      <div class="back" onclick="closeDetail()">&#8249;</div>
+      <div class="back" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="#12161A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
       <div class="dtitle" id="detailTitle">-</div>
     </div>
     <div class="dbody"></div>
