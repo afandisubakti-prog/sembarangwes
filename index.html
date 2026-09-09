@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Data Sentral</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1362C4">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Data Sentral">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { height:100%; overflow:hidden; touch-action:pan-y; background:#F2F4F7; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
@@ -56,6 +65,37 @@
 
   .chev { color:rgba(255,255,255,0.65); font-size:1.3rem; margin-left:8px; flex-shrink:0; }
 
+  /* Banner instal aplikasi */
+  #installBar {
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin:0 14px 14px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:#12161A;
+    box-shadow:0 4px 12px rgba(0,0,0,0.18);
+  }
+  #installBar span { color:#fff; font-size:0.88rem; font-weight:600; }
+  #installBar button {
+    background:#29A0F0; color:#fff; border:none;
+    padding:9px 16px; border-radius:10px;
+    font-size:0.86rem; font-weight:700;
+    flex-shrink:0;
+  }
+  #iosTip {
+    display:none;
+    margin:0 14px 14px;
+    padding:12px 14px;
+    border-radius:14px;
+    background:#FFF4D6;
+    color:#7A5B00;
+    font-size:0.84rem;
+    font-weight:600;
+    line-height:1.4;
+  }
+
   /* Halaman detail (placeholder abu-abu) */
   #detail {
     position:fixed; inset:0;
@@ -86,6 +126,13 @@
 
   <div id="home">
     <div class="topbar"><span>Data Sentral</span></div>
+
+    <div id="installBar">
+      <span>Instal aplikasi ini ke HP-mu</span>
+      <button onclick="installApp()">Instal</button>
+    </div>
+    <div id="iosTip">Tap ikon Share (kotak dengan panah ke atas) di bagian bawah Safari, lalu pilih "Add to Home Screen" untuk memasang aplikasi ini.</div>
+
     <div class="list">
 
       <div class="menu-item" data-target="Coal Handling Facility" onclick="openDetail(this)">
@@ -148,6 +195,38 @@
     }
     function closeDetail() {
       document.getElementById('detail').classList.remove('active');
+    }
+
+    // Deteksi apakah sudah berjalan sebagai aplikasi terinstal
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    // Android/Chrome: tampilkan tombol instal
+    var deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!isStandalone) document.getElementById('installBar').style.display = 'flex';
+    });
+    function installApp() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function() {
+        deferredPrompt = null;
+        document.getElementById('installBar').style.display = 'none';
+      });
+    }
+    window.addEventListener('appinstalled', function() {
+      document.getElementById('installBar').style.display = 'none';
+    });
+
+    // iPhone/Safari: tidak ada prompt otomatis, tampilkan petunjuk manual
+    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOS && !isStandalone) {
+      document.getElementById('iosTip').style.display = 'block';
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function(){});
     }
   </script>
 
