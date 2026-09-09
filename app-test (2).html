@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>App</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; touch-action:none; background:#000; }
+  #track {
+    height:100%;
+    width:600%;
+    display:flex;
+    transition: transform 0.25s ease-out;
+  }
+  .page { height:100%; width:16.6667%; }
+  .p1 { background:#E03131; }
+  .p2 { background:#F5C400; }
+  .p3 { background:#2F9E44; }
+  .p4 { background:#1971C2; }
+  .p5 { background:#111111; }
+  .p6 { background:#FFFFFF; }
+</style>
+</head>
+<body>
+  <div id="track">
+    <div class="page p1"></div>
+    <div class="page p2"></div>
+    <div class="page p3"></div>
+    <div class="page p4"></div>
+    <div class="page p5"></div>
+    <div class="page p6"></div>
+  </div>
+  <script>
+    var track = document.getElementById('track');
+    var total = 6;
+    var current = 0;
+    var startX = 0;
+    var dx = 0;
+    var w = window.innerWidth;
+
+    function render(withTransition) {
+      track.style.transition = withTransition ? 'transform 0.25s ease-out' : 'none';
+      track.style.transform = 'translateX(' + (-current * w) + 'px)';
+    }
+
+    window.addEventListener('resize', function() {
+      w = window.innerWidth;
+      render(false);
+    });
+
+    document.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      dx = 0;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function(e) {
+      dx = e.touches[0].clientX - startX;
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(' + (-current * w + dx) + 'px)';
+    }, { passive: true });
+
+    document.addEventListener('touchend', function() {
+      var threshold = w * 0.15;
+      if (dx < -threshold && current < total - 1) {
+        current++;
+      } else if (dx > threshold && current > 0) {
+        current--;
+      }
+      render(true);
+    });
+
+    render(false);
+  </script>
+</body>
+</html>
