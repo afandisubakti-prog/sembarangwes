@@ -178,7 +178,38 @@
   .back:active { background:#E4E7EB; transform:scale(0.92); }
   .back svg { width:18px; height:18px; }
   .dtitle { font-weight:800; font-size:1.0rem; color:#12161A; }
-  .dbody { flex:1; }
+  .dbody { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+
+  /* Tema gelap khusus untuk daftar Nama & NID */
+  #detail.dark { background:#161A22; }
+  #detail.dark .dtop { background:#10131A; border-bottom:1px solid #262B36; }
+  #detail.dark .dtitle { color:#F2F4F7; }
+  #detail.dark .back { background:#232838; }
+
+  .nid-wrap { padding:16px 14px 30px; }
+  .nid-card {
+    background:#212635;
+    border:1px solid #2C3244;
+    border-radius:18px;
+    padding:14px 16px 6px;
+    margin-bottom:14px;
+  }
+  .nid-shift {
+    color:#5EEAD4;
+    font-weight:800;
+    font-size:0.92rem;
+    letter-spacing:0.04em;
+    margin-bottom:8px;
+  }
+  .nid-row {
+    display:flex;
+    padding:7px 0;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    font-size:0.85rem;
+  }
+  .nid-row:last-child { border-bottom:none; }
+  .nid-no { width:24px; flex-shrink:0; color:#7C8494; }
+  .nid-name { color:#E4E7EC; }
 </style>
 </head>
 <body>
@@ -298,18 +329,96 @@
     <div class="lb-text">LEADERBOARD</div>
   </div>
 
+  <template id="namaNidTemplate">
+    <div class="nid-wrap">
+      <div class="nid-card">
+        <div class="nid-shift">CHCB A</div>
+        <div class="nid-row"><div class="nid-no">1</div><div class="nid-name">I NYOMAN KUNCORO</div></div>
+        <div class="nid-row"><div class="nid-no">2</div><div class="nid-name">MUH. BAHARRUDIN ALWI</div></div>
+        <div class="nid-row"><div class="nid-no">3</div><div class="nid-name">ENDRO PRASETYO</div></div>
+        <div class="nid-row"><div class="nid-no">4</div><div class="nid-name">SUSCAHYO DEDI</div></div>
+        <div class="nid-row"><div class="nid-no">5</div><div class="nid-name">HARTONO</div></div>
+        <div class="nid-row"><div class="nid-no">6</div><div class="nid-name">RAHMAD PRIADI</div></div>
+        <div class="nid-row"><div class="nid-no">7</div><div class="nid-name">AKHMAD SYABIL MARUZI</div></div>
+        <div class="nid-row"><div class="nid-no">8</div><div class="nid-name">IMAM FITRONI</div></div>
+        <div class="nid-row"><div class="nid-no">9</div><div class="nid-name">AHMAD WILDAN NURIL HAKIM</div></div>
+        <div class="nid-row"><div class="nid-no">10</div><div class="nid-name">ANDI ACHMAD</div></div>
+        <div class="nid-row"><div class="nid-no">11</div><div class="nid-name">ADI SETYAWAN</div></div>
+      </div>
+
+      <div class="nid-card">
+        <div class="nid-shift">CHCB B</div>
+        <div class="nid-row"><div class="nid-no">1</div><div class="nid-name">SRI SOEMARETA</div></div>
+        <div class="nid-row"><div class="nid-no">2</div><div class="nid-name">SISWANTO</div></div>
+        <div class="nid-row"><div class="nid-no">3</div><div class="nid-name">ACHMAD ZAM ZAMI FITHRI</div></div>
+        <div class="nid-row"><div class="nid-no">4</div><div class="nid-name">FREDY PRATAMA YUDHA</div></div>
+        <div class="nid-row"><div class="nid-no">5</div><div class="nid-name">BUDI SUWITO</div></div>
+        <div class="nid-row"><div class="nid-no">6</div><div class="nid-name">LINGGA WIJAYADI</div></div>
+        <div class="nid-row"><div class="nid-no">7</div><div class="nid-name">EGO SUSILO HERAYA</div></div>
+        <div class="nid-row"><div class="nid-no">8</div><div class="nid-name">GEMPUR BEBASNO</div></div>
+        <div class="nid-row"><div class="nid-no">9</div><div class="nid-name">M. BURHANUNUDDIN PAMUNGKAS</div></div>
+        <div class="nid-row"><div class="nid-no">10</div><div class="nid-name">MUHAMMAD NURUL QOLBI</div></div>
+        <div class="nid-row"><div class="nid-no">11</div><div class="nid-name">ILHAM DWI ARFIANSYAH</div></div>
+      </div>
+
+      <div class="nid-card">
+        <div class="nid-shift">CHCB C</div>
+        <div class="nid-row"><div class="nid-no">1</div><div class="nid-name">YUDI CHOIRUL UMAM</div></div>
+        <div class="nid-row"><div class="nid-no">2</div><div class="nid-name">RUDI WIYANTO</div></div>
+        <div class="nid-row"><div class="nid-no">3</div><div class="nid-name">NOVAN HERMAWAN</div></div>
+        <div class="nid-row"><div class="nid-no">4</div><div class="nid-name">M. KHAMIDUDDIN</div></div>
+        <div class="nid-row"><div class="nid-no">5</div><div class="nid-name">SYAIFUL ALI</div></div>
+        <div class="nid-row"><div class="nid-no">6</div><div class="nid-name">MUHAMMAD NURDIN</div></div>
+        <div class="nid-row"><div class="nid-no">7</div><div class="nid-name">MOHAMMAD TAUFIK</div></div>
+        <div class="nid-row"><div class="nid-no">8</div><div class="nid-name">LAHURI SUBAKTIYO</div></div>
+        <div class="nid-row"><div class="nid-no">9</div><div class="nid-name">ERWIN CANDRA SETIAWAN</div></div>
+        <div class="nid-row"><div class="nid-no">10</div><div class="nid-name">BUYUNG ANUGERAH</div></div>
+        <div class="nid-row"><div class="nid-no">11</div><div class="nid-name">MOH FAHRUDIN FAJAR ROMADLON</div></div>
+        <div class="nid-row"><div class="nid-no">12</div><div class="nid-name">ADAM DWI KANSUMAN</div></div>
+      </div>
+
+      <div class="nid-card">
+        <div class="nid-shift">CHCB D</div>
+        <div class="nid-row"><div class="nid-no">1</div><div class="nid-name">RUDY HADI KURNIAWAN</div></div>
+        <div class="nid-row"><div class="nid-no">2</div><div class="nid-name">DICKI DWI SYAHROHADI</div></div>
+        <div class="nid-row"><div class="nid-no">3</div><div class="nid-name">DWI DARMAWAN</div></div>
+        <div class="nid-row"><div class="nid-no">4</div><div class="nid-name">WAHYU DWI PRATITIS</div></div>
+        <div class="nid-row"><div class="nid-no">5</div><div class="nid-name">BIMA VALENTINO AJI</div></div>
+        <div class="nid-row"><div class="nid-no">6</div><div class="nid-name">M. WAHYUDIANTO</div></div>
+        <div class="nid-row"><div class="nid-no">7</div><div class="nid-name">MIFTAKHUL ULUM</div></div>
+        <div class="nid-row"><div class="nid-no">8</div><div class="nid-name">GAMA YAMAFI</div></div>
+        <div class="nid-row"><div class="nid-no">9</div><div class="nid-name">MOCHAMAD MUSOLINI</div></div>
+        <div class="nid-row"><div class="nid-no">10</div><div class="nid-name">ANGGA RISQY PUTRA</div></div>
+        <div class="nid-row"><div class="nid-no">11</div><div class="nid-name">SATRIO PUJO LEGOWO</div></div>
+        <div class="nid-row"><div class="nid-no">12</div><div class="nid-name">SAIFUDIN ABDILLAH</div></div>
+      </div>
+    </div>
+  </template>
+
   <div id="detail">
     <div class="dtop">
       <div class="back" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="#12161A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
       <div class="dtitle" id="detailTitle">-</div>
     </div>
-    <div class="dbody"></div>
+    <div class="dbody" id="detailBody"></div>
   </div>
 
   <script>
     function openDetail(el) {
-      document.getElementById('detailTitle').textContent = el.getAttribute('data-target');
-      document.getElementById('detail').classList.add('active');
+      var title = el.getAttribute('data-target');
+      document.getElementById('detailTitle').textContent = title;
+      var body = document.getElementById('detailBody');
+      var detailEl = document.getElementById('detail');
+      if (title === 'Nama & NID') {
+        var tpl = document.getElementById('namaNidTemplate');
+        body.innerHTML = '';
+        body.appendChild(tpl.content.cloneNode(true));
+        detailEl.classList.add('dark');
+      } else {
+        body.innerHTML = '';
+        detailEl.classList.remove('dark');
+      }
+      detailEl.classList.add('active');
     }
     function closeDetail() {
       document.getElementById('detail').classList.remove('active');
