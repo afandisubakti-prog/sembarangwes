@@ -66,6 +66,27 @@
   .nav-btn svg { width:19px; height:19px; }
   #prevBtn { left:14px; }
   #nextBtn { right:14px; }
+
+  #copyBtn {
+    position:fixed;
+    left:50%;
+    bottom:calc(max(16px, env(safe-area-inset-bottom)) + 6px);
+    transform:translateX(-50%);
+    height:42px;
+    padding:0 18px;
+    border-radius:21px;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+    font-size:0.82rem;
+    font-weight:700;
+    display:flex; align-items:center; gap:6px;
+    transition:transform .15s ease, background .15s ease;
+    z-index:5;
+    white-space:nowrap;
+  }
+  #copyBtn:active { transform:translateX(-50%) scale(0.94); background:rgba(255,255,255,0.18); }
+  #copyBtn svg { width:15px; height:15px; }
+  #copyBtn.done { background:rgba(94,234,212,0.22); color:#5EEAD4; }
 </style>
 </head>
 <body>
@@ -74,6 +95,7 @@
   </div>
 
   <div class="nav-btn" id="prevBtn" onclick="goDay(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
+  <div id="copyBtn" onclick="copySchedule()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg><span id="copyLabel">Salin</span></div>
   <div class="nav-btn" id="nextBtn" onclick="goDay(1)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></div>
 
   <script>
@@ -127,6 +149,54 @@ var FIVES_DATA = {"2022-1-1":["ID Fan A & Lube Oil System","Booster Pump A & B",
     function goDay(delta) {
       currentDate.setDate(currentDate.getDate() + delta);
       render();
+    }
+
+    function buildCopyText() {
+      var key = dateKey(currentDate);
+      var rtpmItems = RTPM_DATA[key];
+      var fivesItems = FIVES_DATA[key];
+      var text = '*Informasi jadwal RTPM & 5S*\n*' + dateLabel(currentDate) + '*\n\n';
+      text += '*RTPM*\n';
+      if (rtpmItems && rtpmItems.length) {
+        rtpmItems.forEach(function(t, i) { text += (i+1) + '. ' + t + '\n'; });
+      } else {
+        text += '-\n';
+      }
+      text += '\n*5S*\n';
+      if (fivesItems && fivesItems.length) {
+        fivesItems.forEach(function(t, i) { text += (i+1) + '. ' + t + '\n'; });
+      } else {
+        text += '-\n';
+      }
+      text += '\nNoted : Setelah melakukan RTPM agar mengisi google form yang sudah tersedia dan membuat SR FLM untuk aktivitas 5S';
+      return text;
+    }
+
+    function copySchedule() {
+      var text = buildCopyText();
+      function done() {
+        var btn = document.getElementById('copyBtn');
+        var label = document.getElementById('copyLabel');
+        label.textContent = 'Tersalin';
+        btn.classList.add('done');
+        setTimeout(function(){ label.textContent = 'Salin'; btn.classList.remove('done'); }, 1500);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy(text, done); });
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+
+    function fallbackCopy(text, cb) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      try { document.execCommand('copy'); cb(); } catch (e) {}
+      document.body.removeChild(ta);
     }
 
     render();
