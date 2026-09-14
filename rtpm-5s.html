@@ -6,9 +6,11 @@
 <title>Jadwal RTPM & 5S</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body { height:100%; background:#161A22; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  html, body { height:100%; background:#161A22; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  body { display:flex; flex-direction:column; overflow:hidden; }
 
-  .wrap { padding:16px 14px 30px; }
+  #scrollArea { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .wrap { padding:16px 14px 90px; }
 
   .date-label { color:#8890A0; font-size:0.78rem; font-weight:600; margin-bottom:14px; text-align:center; }
 
@@ -44,25 +46,95 @@
     line-height:1.5;
   }
   .note b { color:#D8DCE3; }
+
+  .empty { text-align:center; color:#7C8494; font-size:0.86rem; padding:60px 20px; }
+
+  /* Navigasi tanggal */
+  .nav-btn {
+    position:fixed;
+    bottom:calc(max(16px, env(safe-area-inset-bottom)) + 6px);
+    width:42px; height:42px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.1);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .15s ease, background .15s ease;
+    z-index:5;
+  }
+  .nav-btn:active { transform:scale(0.9); background:rgba(255,255,255,0.18); }
+  .nav-btn svg { width:19px; height:19px; }
+  #prevBtn { left:14px; }
+  #nextBtn { right:14px; }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="date-label">Senin, 14 September 2026</div>
-
-    <div class="section-title first">RTPM</div>
-    <!-- Catatan edit: jika RTPM kosong / tertulis "(TIDAK ADA RTPM)", hapus saja baris item-card RTPM di bawah ini, jangan ditulis -->
-    <div class="item-card rtpm">1. TURBIN LUBE OIL PUMP (AC, DC, BACK UP)</div>
-    <div class="item-card rtpm">2. TURBIN LUBE OIL EXHAUST FAN B</div>
-
-    <div class="section-title">5S</div>
-    <div class="item-card fives">1. Lube Oil System FD Fan B</div>
-    <div class="item-card fives">2. Hydraulic Tank, HV Mill, Lube Oil Mill E dan Coal Feeder E</div>
-    <div class="item-card fives">3. Motor Coal Plough 1E Jalur C6A</div>
-    <div class="item-card fives">4. Motor Coal Plough 1F Jalur C6A</div>
-    <div class="item-card fives">5. HP Pump SWRO 3</div>
-
-    <div class="note"><b>Catatan:</b> Setelah melakukan RTPM agar mengisi Google Form yang sudah tersedia, dan membuat SR FLM untuk aktivitas 5S.</div>
+  <div id="scrollArea">
+    <div class="wrap" id="content"></div>
   </div>
+
+  <div class="nav-btn" id="prevBtn" onclick="goDay(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
+  <div class="nav-btn" id="nextBtn" onclick="goDay(1)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></div>
+
+  <script>
+    // Data jadwal per tanggal (key format: YYYY-M-D). Tambahkan entri baru di sini untuk hari-hari berikutnya.
+    // Catatan edit: jika RTPM kosong / tertulis "(TIDAK ADA RTPM)", hapus saja baris item rtpm-nya, jangan ditulis.
+    var scheduleData = {
+      '2026-9-14': {
+        rtpm: [
+          'TURBIN LUBE OIL PUMP (AC, DC, BACK UP)',
+          'TURBIN LUBE OIL EXHAUST FAN B'
+        ],
+        fives: [
+          'Lube Oil System FD Fan B',
+          'Hydraulic Tank, HV Mill, Lube Oil Mill E dan Coal Feeder E',
+          'Motor Coal Plough 1E Jalur C6A',
+          'Motor Coal Plough 1F Jalur C6A',
+          'HP Pump SWRO 3'
+        ],
+        note: 'Setelah melakukan RTPM agar mengisi Google Form yang sudah tersedia, dan membuat SR FLM untuk aktivitas 5S.'
+      }
+    };
+
+    var HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    var BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+    var currentDate = new Date(); // otomatis lompat ke hari ini
+
+    function dateKey(d) { return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate(); }
+    function dateLabel(d) { return HARI[d.getDay()] + ', ' + d.getDate() + ' ' + BULAN[d.getMonth()] + ' ' + d.getFullYear(); }
+
+    function render() {
+      var key = dateKey(currentDate);
+      var data = scheduleData[key];
+      var html = '<div class="date-label">' + dateLabel(currentDate) + '</div>';
+      if (!data) {
+        html += '<div class="empty">Belum ada jadwal RTPM &amp; 5S untuk tanggal ini</div>';
+      } else {
+        if (data.rtpm && data.rtpm.length) {
+          html += '<div class="section-title first">RTPM</div>';
+          data.rtpm.forEach(function(t, i) {
+            html += '<div class="item-card rtpm">' + (i+1) + '. ' + t + '</div>';
+          });
+        }
+        if (data.fives && data.fives.length) {
+          html += '<div class="section-title' + (data.rtpm && data.rtpm.length ? '' : ' first') + '">5S</div>';
+          data.fives.forEach(function(t, i) {
+            html += '<div class="item-card fives">' + (i+1) + '. ' + t + '</div>';
+          });
+        }
+        if (data.note) {
+          html += '<div class="note"><b>Catatan:</b> ' + data.note + '</div>';
+        }
+      }
+      document.getElementById('content').innerHTML = html;
+      document.getElementById('scrollArea').scrollTop = 0;
+    }
+
+    function goDay(delta) {
+      currentDate.setDate(currentDate.getDate() + delta);
+      render();
+    }
+
+    render();
+  </script>
 </body>
 </html>
