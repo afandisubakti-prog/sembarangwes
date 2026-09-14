@@ -73,11 +73,11 @@
   #pagesViewport { flex:1; overflow:hidden; position:relative; }
   #pagesTrack {
     height:100%;
-    width:300%;
+    width:500%;
     display:flex;
     transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .menuPage { width:33.3333%; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 14px 100px; }
+  .menuPage { width:20%; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px 14px 100px; }
 
   .menu-item {
     position:relative;
@@ -97,6 +97,14 @@
   .menu-item.yellow {
     background:linear-gradient(135deg, #FBBF24, #D97706);
     box-shadow:0 6px 14px rgba(217,119,6,0.28);
+  }
+  .menu-item.pink {
+    background:linear-gradient(135deg, #F472B6, #DB2777);
+    box-shadow:0 6px 14px rgba(219,39,119,0.28);
+  }
+  .menu-item.slate {
+    background:linear-gradient(135deg, #64748B, #334155);
+    box-shadow:0 6px 14px rgba(51,65,85,0.28);
   }
   .menu-item:active {
     transform:scale(0.965);
@@ -232,6 +240,9 @@
   .wo-desc { color:#D8DCE3; font-size:0.8rem; line-height:1.35; }
   .wo-empty { color:#8890A0; font-size:0.85rem; text-align:center; padding:20px 0; }
 
+  .color-list { padding:16px 14px 30px; display:flex; flex-direction:column; gap:8px; }
+  .color-row { border-radius:12px; padding:13px 16px; font-weight:700; font-size:0.88rem; }
+
   .back-float {
     position:fixed;
     left:16px;
@@ -347,7 +358,7 @@
   <div id="home">
     <div class="topbar">
       <span>Data Sentral</span>
-      <div class="dots"><i class="d on"></i><i class="d"></i><i class="d"></i></div>
+      <div class="dots"><i class="d on"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i></div>
     </div>
 
     <div id="installBar">
@@ -443,9 +454,26 @@
           </div>
         </div>
 
+        <!-- Halaman 4 -->
+        <div class="menuPage">
+          <div class="menu-item pink" data-target="Jadwal RTPM & 5S" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/><path d="M8 13h2M8 16h2M14 13h2M14 16h2"/></svg></div>
+            <div class="txtwrap"><div class="name">Jadwal RTPM &amp; 5S</div></div>
+          </div>
+        </div>
+
+        <!-- Halaman 5 -->
+        <div class="menuPage">
+          <div class="menu-item slate" data-target="Referensi Warna Dashboard" onclick="openDetail(this)">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 000 16"/></svg></div>
+            <div class="txtwrap"><div class="name">Referensi Warna Dashboard</div></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
+
 
   <div id="leaderboardBtn" data-target="LEADERBOARD" onclick="openDetail(this)">
     <div class="lb-lines" id="lbLines">
@@ -817,6 +845,36 @@
       return html;
     }
 
+    // Referensi 50 warna untuk dashboard
+    var colorRef = [
+      ['Merah','#E53935','#fff'],['Merah Muda','#EC407A','#fff'],['Merah Marun','#7B1E1E','#fff'],
+      ['Merah Bata','#C1440E','#fff'],['Merah Delima','#9B111E','#fff'],['Salem','#FA8072','#1a1a1a'],
+      ['Koral','#FF7F50','#1a1a1a'],['Jingga','#FB8C00','#fff'],['Jingga Tua','#E65100','#fff'],
+      ['Persik','#FFCBA4','#1a1a1a'],['Kuning','#FDD835','#1a1a1a'],['Kuning Mustard','#D4AC0D','#1a1a1a'],
+      ['Emas','#D4AF37','#1a1a1a'],['Krem','#F5F5DC','#1a1a1a'],['Lime','#AEEA00','#1a1a1a'],
+      ['Hijau','#43A047','#fff'],['Hijau Tua','#1B5E20','#fff'],['Hijau Muda','#A5D6A7','#1a1a1a'],
+      ['Hijau Zaitun','#808000','#fff'],['Hijau Army','#4B5320','#fff'],['Hijau Botol','#014421','#fff'],
+      ['Hijau Mint','#98FF98','#1a1a1a'],['Hijau Toska','#00B8A9','#fff'],['Pirus','#40E0D0','#1a1a1a'],
+      ['Cyan','#00BCD4','#fff'],['Biru Langit','#64B5F6','#1a1a1a'],['Biru','#1E88E5','#fff'],
+      ['Biru Muda','#90CAF9','#1a1a1a'],['Biru Baby','#AEDFF7','#1a1a1a'],['Biru Dongker','#0D47A1','#fff'],
+      ['Nila','#3949AB','#fff'],['Indigo Tua','#1A237E','#fff'],['Ungu','#8E24AA','#fff'],
+      ['Ungu Muda','#B39DDB','#1a1a1a'],['Lavender','#E6E6FA','#1a1a1a'],['Magenta','#D81B60','#fff'],
+      ['Fuchsia','#E91E63','#fff'],['Merah Anggur','#722F37','#fff'],['Coklat','#6D4C41','#fff'],
+      ['Coklat Tua','#3E2723','#fff'],['Coklat Muda','#A1887F','#fff'],['Tan','#D2B48C','#1a1a1a'],
+      ['Beige','#E8DCC8','#1a1a1a'],['Abu-Abu','#757575','#fff'],['Abu Tua','#424242','#fff'],
+      ['Abu Muda','#BDBDBD','#1a1a1a'],['Perak','#C0C0C0','#1a1a1a'],['Hitam','#212121','#fff'],
+      ['Putih','#FAFAFA','#1a1a1a'],['Merah Muda Pastel','#F8BBD0','#1a1a1a']
+    ];
+
+    function buildColorList() {
+      var html = '<div class="color-list">';
+      colorRef.forEach(function(c, i) {
+        html += '<div class="color-row" style="background:' + c[1] + ';color:' + c[2] + ';">' + (i+1) + '. ' + c[0] + '</div>';
+      });
+      html += '</div>';
+      return html;
+    }
+
     function openWO(name) {
       var items = woData[name] || [];
       document.getElementById('woSheetTitle').textContent = name;
@@ -859,6 +917,13 @@
         content.innerHTML = '<iframe src="coalyard-simulator.html" style="width:100%;height:100%;border:0;display:block;background:#1a1a1a;"></iframe>';
         detailEl.classList.add('embed');
         subtitleEl.textContent = '';
+      } else if (title === 'Jadwal RTPM & 5S') {
+        content.innerHTML = '<iframe src="rtpm-5s.html" style="width:100%;height:100%;border:0;display:block;background:#161A22;"></iframe>';
+        detailEl.classList.add('embed');
+        subtitleEl.textContent = '';
+      } else if (title === 'Referensi Warna Dashboard') {
+        content.innerHTML = buildColorList();
+        subtitleEl.textContent = '';
       } else {
         content.innerHTML = '';
         subtitleEl.textContent = '';
@@ -875,7 +940,7 @@
     var track = document.getElementById('pagesTrack');
     var lbLines = document.getElementById('lbLines');
     var dotsEls = document.querySelectorAll('.dots .d');
-    var totalPages = 3;
+    var totalPages = 5;
     var current = 0;
     var lbAngle = 0;
     var startX = 0, startY = 0, dx = 0, dragging = false;
