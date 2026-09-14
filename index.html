@@ -178,6 +178,9 @@
   .back:active { background:#E4E7EB; transform:scale(0.92); }
   .back svg { width:18px; height:18px; }
   .dtitle { font-weight:800; font-size:1.0rem; color:#12161A; }
+  .dtop-text { display:flex; flex-direction:column; }
+  .dsubtitle { font-size:0.68rem; color:#8890A0; font-weight:600; margin-top:2px; }
+  #detail.blue .dsubtitle { color:rgba(255,255,255,0.82); }
   .dbody { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 
   .back-float {
@@ -476,7 +479,10 @@
   <div id="detail">
     <div class="dtop">
       <div class="back" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="#12161A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
-      <div class="dtitle" id="detailTitle">-</div>
+      <div class="dtop-text">
+        <div class="dtitle" id="detailTitle">-</div>
+        <div class="dsubtitle" id="detailSubtitle"></div>
+      </div>
     </div>
     <div class="dbody" id="detailBody"></div>
     <div class="back-float" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="#12161A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
@@ -485,6 +491,9 @@
   <script>
     // Data PKU Coal Handling Facility (Sumber: Laporan PKU CHF 27 Juli 2026)
     var chfSections = [
+      { title: '', items: [
+        { name: 'CCR Coal Handling', pct: 100 }
+      ]},
       { title: 'Peralatan Utama', items: [
         { name: 'Ship Unloader 1', pct: 59 },
         { name: 'Ship Unloader 2', pct: 80, downtime: true },
@@ -500,21 +509,19 @@
         { name: 'Conveyor 3B', pct: 45 },
         { name: 'Conveyor 4A', pct: 68 },
         { name: 'Conveyor 4B', pct: 89 },
+        { name: 'Crusher A', pct: 80 },
+        { name: 'Crusher B', pct: 62 },
         { name: 'Conveyor 5A', pct: 78 },
         { name: 'Conveyor 5B', pct: 92 },
         { name: 'Conveyor 6A', pct: 75 },
         { name: 'Conveyor 6B', pct: 81 },
         { name: 'Conveyor 7', pct: 69 }
       ]},
-      { title: '', items: [
-        { name: 'Crusher A', pct: 80 },
-        { name: 'Crusher B', pct: 62 }
-      ]},
       { title: 'Alat Berat', items: [
         { name: 'Bulldozer D9', pct: 100 },
+        { name: 'Excavator', pct: 100 },
         { name: 'Bulldozer 1', pct: 100 },
-        { name: 'Bulldozer 2', pct: 100 },
-        { name: 'Excavator', pct: 100 }
+        { name: 'Bulldozer 2', pct: 100 }
       ]},
       { title: 'Peralatan Bantu', items: [
         { name: 'FOP', pct: 100 },
@@ -549,6 +556,7 @@
     function openDetail(el) {
       var title = el.getAttribute('data-target');
       document.getElementById('detailTitle').textContent = title;
+      var subtitleEl = document.getElementById('detailSubtitle');
       var body = document.getElementById('detailBody');
       var detailEl = document.getElementById('detail');
       detailEl.classList.remove('dark', 'blue');
@@ -557,11 +565,14 @@
         body.innerHTML = '';
         body.appendChild(tpl.content.cloneNode(true));
         detailEl.classList.add('dark');
+        subtitleEl.textContent = '';
       } else if (title === 'Coal Handling Facility') {
         body.innerHTML = buildCHFGrid();
         detailEl.classList.add('blue');
+        subtitleEl.textContent = 'Tarikan data terupdate · Pukul 09:00 WIB · By Whatsapp';
       } else {
         body.innerHTML = '';
+        subtitleEl.textContent = '';
       }
       detailEl.classList.add('active');
     }
