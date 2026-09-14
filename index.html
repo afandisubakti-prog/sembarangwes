@@ -181,7 +181,54 @@
   .dtop-text { display:flex; flex-direction:column; }
   .dsubtitle { font-size:0.68rem; color:#8890A0; font-weight:600; margin-top:2px; }
   #detail.blue .dsubtitle { color:rgba(255,255,255,0.82); }
-  .dbody { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .dbody { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative; }
+
+  .wo-overlay {
+    position:fixed; left:0; right:0; bottom:0;
+    background:rgba(5,10,20,0.5);
+    display:flex; align-items:flex-end; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .22s ease;
+    z-index:20;
+    padding:0 12px calc(12px + env(safe-area-inset-bottom));
+  }
+  .wo-overlay.active { opacity:1; pointer-events:auto; }
+  .wo-sheet {
+    width:100%;
+    max-height:88%;
+    background:#1B2130;
+    border-radius:20px 20px 0 0;
+    padding:14px 14px 10px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    box-shadow:0 -10px 30px rgba(0,0,0,0.35);
+    transform:translateY(16px);
+    transition:transform .22s ease;
+  }
+  .wo-overlay.active .wo-sheet { transform:translateY(0); }
+  .wo-sheet-head {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:10px;
+    padding-bottom:10px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .wo-sheet-title { color:#fff; font-weight:800; font-size:0.96rem; }
+  .wo-close {
+    width:28px; height:28px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.72rem;
+    flex-shrink:0;
+  }
+  .wo-row { padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.07); }
+  .wo-row:last-child { border-bottom:none; }
+  .wo-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px; }
+  .wo-number { color:#4DB8FF; font-weight:800; font-size:0.85rem; }
+  .wo-days { color:#FF5E5E; font-weight:800; font-size:0.78rem; flex-shrink:0; white-space:nowrap; }
+  .wo-desc { color:#D8DCE3; font-size:0.8rem; line-height:1.35; }
+  .wo-empty { color:#8890A0; font-size:0.85rem; text-align:center; padding:20px 0; }
 
   .back-float {
     position:fixed;
@@ -484,7 +531,19 @@
         <div class="dsubtitle" id="detailSubtitle"></div>
       </div>
     </div>
-    <div class="dbody" id="detailBody"></div>
+    <div class="dbody" id="detailBody">
+      <div id="detailContent"></div>
+    </div>
+
+    <div class="wo-overlay" id="woOverlay" onclick="if(event.target===this) closeWO()">
+      <div class="wo-sheet" id="woSheet">
+        <div class="wo-sheet-head">
+          <div class="wo-sheet-title" id="woSheetTitle">-</div>
+          <div class="wo-close" onclick="closeWO()">&#10005;</div>
+        </div>
+        <div class="wo-list" id="woList"></div>
+      </div>
+    </div>
     <div class="back-float" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="#12161A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
   </div>
 
@@ -535,6 +594,209 @@
       return 'green';
     }
 
+    // Data WO/SR aktif per peralatan (Sumber: Laporan PKU CHF 27 Juli 2026) — format [no WO/SR, hari aktif, keterangan]
+    var woData = {
+      'Ship Unloader 1': [
+        ['WO295014','13','WIRE ROPE GRAP OPEN-CLOSE LANDSIDE SU1 RANTAS'],
+        ['728173','23','GRAB SU1 HILANG KONTROL'],
+        ['WO288895','79','SUPPORT BEARING OPEN CLOSE WIREROPE GRAB SU1 AMBROL'],
+        ['WO290700','56','CLEANER RODA GANTRY SU1 SISI LAND SIDE HILANG'],
+        ['WO286968','100','PCRD SU1 TIDAK BISA GULUNG'],
+        ['WO286834','104','MOTOR GANTRY SU1 NOMOR 5 SERRING TRIP'],
+        ['WO286419','109','SEAL GEARBOX MOTOR GANTRY SU1 BOCOR'],
+        ['WO286847','102','PINTU RUANG BREAKER SU1 PATAH'],
+        ['WO294322','20','SU1 UNION TE TIDAK BISA PINDAH JALUR'],
+        ['WO292883','32','Limit proxy belum dapat feedback, motor running tapi union tee tidak gerak'],
+        ['WO289554','70','PUSH BOTTON SPILGATE DOWN SU1 RUSAK'],
+        ['WO291559','51','PINTU PANEL AUTO GREASING SU1 LEPAS']
+      ],
+      'Ship Unloader 2': [
+        ['WO292235','40','LIMIT PROXIMITY HOPPER GATE UP SU2 RUSAK'],
+        ['WO289565','71','KABIN SU #2 TIDAK BISA GESER'],
+        ['WO287046','100','Handrail dekat tangga menuju pintu hopper Su2 patah'],
+        ['WO289561','73','LINE DUST FOGGING SHIP UNLOADER 2 BOCOR'],
+        ['WO289560','73','VALVE PENGISIAN DUST FOGGING SHIP UNLOADER 2 PASSING'],
+        ['WO295013','16','RUBBER SKRIT SU2 JALUR B SISI DALAM RENGGANG'],
+        ['WO287222','100','RUBBER SKIRT SU2 JALUR B COPOT'],
+        ['WO293556','25','KABEL TRAY SU2 LEPAS PENUTUPNYA'],
+        ['WO286802','107','SU2 MUNCUL ALARM ISU FAULT SAAT DI START']
+      ],
+      'Stacker Reclaimer 1': [
+        ['WO287885','92','SELANG HIDROLIC TRIPER SR1 LEPAS'],
+        ['WO291634','45','SR MOTOR SLEWING SR1 OVERLOAD'],
+        ['WO295121','12','DINDING BRAKER SR1 RUSAK (NGLENGKAP)'],
+        ['WO290703','56','GREATING AREA PANEL PINDAH MODE LOKAL KOROSI'],
+        ['WO289954','63','MOTOR VIBRATOR SR1 LEPAS DARI SUPPORTNYA'],
+        ['WO289567','70','ATAP CABIN SR1 BOCOR'],
+        ['WO288368','86','MOTOR VIBRATOR SR1 LEPAS DARI SUPPORTNYA'],
+        ['WO287894','91','BAUT SUPPORT HYDRAULIC TRIPPER SR1 KOROSI'],
+        ['WO287880','93','ATAP RUANG BREAKER SR1 KOROSIF BERLUBANG'],
+        ['WO287277','100','Support motor gantry no.8 SR1 Korosif'],
+        ['WO287035','101','SUPPORT PENYANGGA PENGARAH BOOM SR1 PATAH'],
+        ['WO286807','105','H beem dan Suppot SR1 banyak yang keropos'],
+        ['WO286806','105','Hand rail area motor pump hydraulic tripper sr1 keropos dan tidak safety'],
+        ['WO292875','33','PLAFON BREAKER ROOM 380 SR1 AMBROL'],
+        ['WO294742','17','RUBBER SKRIT BOOM SR1 SISI HEAD RENGGANG'],
+        ['WO292873','33','RUBBER SKIRT BOOM CONVEYOR SR1 AUS'],
+        ['WO291567','49','Rubber pengarah SR1 AUS'],
+        ['WO290701','56','RUBBER SKIRT BOOM STACKER RECLAIMERER 1 SOBEK'],
+        ['WO295637','10','RETURN ROLLER TRIPPER SR1 OBLAK/ ANJLOK'],
+        ['WO292833','35','MCB LAMPU BOOM SR1 TRIP'],
+        ['WO291569','49','BAUT DINA BOLT KABEL TRAY SR1 PATAH'],
+        ['WO286198','112','LAMPU PENERANGAN AREA CHUTE SR1 TIDAK ADA']
+      ],
+      'Stacker Reclaimer 2': [
+        ['WO288400','83','BOOM SR2 SERING TRIP SAAT DI OPERASIKAN'],
+        ['WO287893','91','OLI MOTOR GANTRY SR2 HABIS SEMUA KECUALI NO 9'],
+        ['WO290251','61','Proxy Zero Position Slewing SR 2 Rusak'],
+        ['WO289630','68','Boom slewing left limit SR2'],
+        ['WO286216','111','BOOM CONVEYOR SR2 BERLUBANG'],
+        ['WO290694','57','MOTOR VIBRATOR SR2 KONDISI PATAH DAN TERLEPAS DARI SUPPORT CHUTE SR2'],
+        ['WO294624','18','GREATING STACKER RECLAIMER 2 AREA TRIPER KOROSI'],
+        ['WO292254','39','PAGAR BELAKANG SR2 SISI UTARA RUSAK'],
+        ['WO290702','56','PEGANGAN TANGGA STACKER RECLAIMER 2 KOROSI'],
+        ['WO286823','106','SUPPORT PENGARAH MODE RECLAIM SR2 CRACK DAN KOROSIF'],
+        ['WO286799','107','STRUCTURE H BEAM SR2 SISI SELATAN KONDISI PATAH'],
+        ['WO290693','57','RUBBER LAGGING PULLEY SR2 KONDISI ROBEK DAN MENYINGKAP'],
+        ['WO295726','9','RUBERSKIRT BOOM STACKER RECLAIMER 2 AUS'],
+        ['WO294321','24','RUBBER SKIRT BUCKET WHELL SR2 SOBEK'],
+        ['WO293322','30','RUBBER SKIRT BOOM CONVEYOR STACKER RECLAIMER 2 SISI UTARA AUS'],
+        ['WO286422','109','RETURN ROLL SR2 AMBROL'],
+        ['WO290678','58','RUBBER FLEXIBLE JOINT HYDROLIK SR2 SOBEK'],
+        ['WO286199','112','LAMPU PENERANGAN AREA CHUTE SR2 TIDAK ADA']
+      ],
+      'Conveyor 1A': [
+        ['WO289651','66','BELT SWAY CONVEYOR 1A SISI LUAR AMBROL'],
+        ['WO291480','49','BEARING ROLLER C1A AMBROL'],
+        ['WO288893','77','C1A steering return roller bearing ambrol'],
+        ['WO288894','79','RETURN ROLL C1A PECAH'],
+        ['WO285977','115','CCTV JETTY 1 DAN UG TT1 ERROR']
+      ],
+      'Conveyor 1B': [
+        ['WO286249','110','BELT CONVEYOR 1B BERLUBANG'],
+        ['WO289932','65','SUPPORT BELT SWAY C1B SISI TAIL SEBELAH BARAT AMBROL'],
+        ['WO286214','111','MS C1B EKSISTASI SHORT'],
+        ['WO291479','51','Secondary cleaner renggang butuh adjust C1B Head']
+      ],
+      'Conveyor 2A': [
+        ['WO295018','16','C2A BOX PROTEKSI PULL CORD TIDAK BISA RELEASE SISI DALAM DAN LUAR'],
+        ['WO289041','75','Bell / Sirine C2 A&B tidak bunyi'],
+        ['WO289937','65','SECONDARY CLEANER C2A KONDISI AUS'],
+        ['WO292232','40','Rubber skirt C2A sobek sisi dalam']
+      ],
+      'Conveyor 2B': [
+        ['WO295040','14','CHUTE C2B KE MOVABLE C3B BERLUBANG'],
+        ['WO287549','94','TRUE TRACK C2B SISI DALAM MACET AREA SKIRTBORD'],
+        ['WO287044','100','STERING RETURN C2B BEARING AMBROL'],
+        ['WO292109','42','RUBBER CLEANER CONVEYOR 2B HILANG'],
+        ['WO289936','65','SECONDARY CLEANER C2B HEAD TIDAK ADA'],
+        ['WO286423','109','KERUSAKAN GRATING AREA CONVEYOR C2'],
+        ['WO295039','14','RUBBER GATE C2B DARI C7 SISI DALAM AUS'],
+        ['WO286252','109','RUBBER CURTAIN C2B TAIL LEPAS'],
+        ['WO286251','109','CONVEYOR 2B SISI BARAT TERDAPAT SOBEKAN']
+      ],
+      'Conveyor 3A': [
+        ['WO289643','67','SAMBUNGAN TOP COVER BELT C3A TERKELUPAS'],
+        ['WO292255','38','SAFETY PLUGH MOTOR HEAD CONVEYOR 3A BEKERJA'],
+        ['WO295893','4','BELL C3A COPOT'],
+        ['WO294341','19','TUAS PROTEKSI BELT SWAY C3A HILANG'],
+        ['WO288364','87','PULL CORD C3A TIDAK BERFUNGSI'],
+        ['WO296370','3','STERING IDLER C3A KONDISI AMBROL'],
+        ['WO292442','38','BEARING IMPACT ROLLER C3A SISI SELATAN RUSAK'],
+        ['WO291608','48','RETURN ROLLER MOVEBLE C3A OBLAK SISI UTARA'],
+        ['WO286949','101','ROLLER CONVEYOR 3A OBLAK AREA MOVABLE (2 & 3 DARI TIMUR)'],
+        ['WO288890','78','SOCKET BREAKER 380 MOVABLE C3A CRACK'],
+        ['WO295120','12','RUBBER SKIRT C3A SOBEK'],
+        ['WO294329','20','RUBBER SKIRT MOVABLE C3A KELUAR'],
+        ['WO292238','40','RUBBER SKIRT C3A SISI SELATAN ROBEK'],
+        ['718844','48','Rubber skirt C3A sisi utara bagian tengah ke barat ±5m robek dan keluar jalur'],
+        ['WO287913','90','Rubber skirt sisi utara movable tt1 material brobos']
+      ],
+      'Conveyor 3B': [
+        ['WO296405','1','MOTOR BRAKE TAIL C3B TIDAK BISA OPEN'],
+        ['WO289658','65','SINYAL PALSU STRAP AVULSION CONVEYOR C3B'],
+        ['WO295636','10','1 RETURN ROLLER 376 & 2 ROLLER TRU TRACK MOVABLE C3B OBLAK'],
+        ['WO291632','45','Return role c3b no 143 ambrol'],
+        ['WO292097','44','KONTAKTOR MOVEABLE TT2 MACET'],
+        ['WO290769','54','chute movable TT2 berlubang'],
+        ['WO289895','65','CHUTE ATAS MOVEABLE TT2 (JALUR POST 2) BERLUBANG'],
+        ['WO288365','87','MAGNETIK SEPARATOR C3B TIDAK BISA RUNNING PUTARAN BERAT'],
+        ['WO286195','112','RANTAI MAGHNETIC SEPARATOR C3B'],
+        ['WO290676','58','TANGGA WATER SCRAPPER C3B TAIL KONDISI KOROSIF PATAH'],
+        ['WO289942','64','RUBBER CLEANER CONVEYOR 3B ARA MS HILANG'],
+        ['WO294320','20','RUBBER SKIRT MOVEABLE C3B SOBEK'],
+        ['WO294320','21','RUBBER SKIRT MOVEABLE C3B SOBEK SISI UTARA'],
+        ['WO290030','62','RUBBER SKIRT MOVABLE C3B KELUAR JALUR'],
+        ['WO289893','64','RUBBER SKIRT MOVABLE C3B SOBEK'],
+        ['WO288359','83','RUBBER SKRIT C3B SISI SELATAN KELUAR JALUR'],
+        ['WO287849','94','RUBBER SKIRT C3B LEPAS'],
+        ['WO289629','68','Atap langit-langit unsafe condition, tail C3B, korosif dan rawan roboh mengenai Conveyor']
+      ],
+      'Conveyor 4A': [
+        ['WO289559','73','SUPPORT KAWAT PULLCORD C4A AMBROL'],
+        ['WO295016','16','MS C4 SISI SELATAN EXITASI TIDAK BISA ON KE JALUR A DAN B'],
+        ['WO291530','50','Diagonal cleaner c4A renggang'],
+        ['WO295017','16','PLAT SAMBUNGAN CHUTE UG TT2 C4A KEROPOS'],
+        ['WO286424','109','KERUSAKAN GRATING CONVEYOR C4B']
+      ],
+      'Conveyor 4B': [
+        ['WO286560','108','STERING IDLER C4B SISI BARAT PATAH'],
+        ['WO290709','55','SECONDARY CLEANER CONVEYOR C4B TIDAK RATA AUS']
+      ],
+      'Crusher A': [
+        ['WO295113','12','FLEXIBLE JOINT CRUSHER A SOBEK'],
+        ['WO287912','90','Fleksibel join crusher a sisi timur'],
+        ['WO289641','67','HAND RAIL CRUSHER A KONDISI PATAH DAN KOROSIF'],
+        ['WO287275','100','GAGANG MANHOLE CRUSHER A COPOT DAN PINLOCK TINGGAL 1']
+      ],
+      'Crusher B': [
+        ['WO288663','80','SINYAL PROTEKSI VIBRASI LEFT BEARING CRUSHER B AKTIF'],
+        ['WO286186','115','FLEXIBLE JOINT CRUSHER B BERLUBANG'],
+        ['716402','53','PENYANGGA MONITOR VIBRASI CRUSHER B ROBOH'],
+        ['WO294493','18','RUBBER MAINHOLE CRUSHER B AUS']
+      ],
+      'Conveyor 5A': [
+        ['WO288363','87','PULL CORD C5A TIDAK BERFUNGSI'],
+        ['742858','-1','Support roller C5A sisi dalam dan luar bengkok'],
+        ['WO290768','54','Rubber cleaner tail c5A aus'],
+        ['WO289656','66','SUPPORT COVER C5A SISI DALAM DAN LUAR KOROSI'],
+        ['WO291610','48','SR VALVE HYDRANT C5A CRUSHER HOUSE RUSAK']
+      ],
+      'Conveyor 5B': [
+        ['708053','75','GUIDE ROLLER TAIL C5B AMBROL'],
+        ['WO286246','110','SUPPORT PULLING ROPE C5B SISI DALAM LEPAS']
+      ],
+      'Conveyor 6A': [
+        ['WO295232','11','SOCKET BREAKER COAL PLOUGH 1B C6A RUSAK'],
+        ['WO295026','14','TRUSTER COAL PLOUGH 1B C6A MACET'],
+        ['WO290712','55','SUPPORT TUAS LIMIT CP 1B C6A BENGKOK'],
+        ['WO288642','80','BAUT PENGUNCI LIMIT COALPLOUGH 2B C6A DOL'],
+        ['WO290776','54','TOMBOL UP PUSHBOTTON PANEL WATER SCRAPPER C6A RUSAK'],
+        ['WO296394','2','RUBBER SKRIT C6A PERLU DI ADJUST (TAIL)'],
+        ['WO289894','65','RUBBER SKIRT C6A SISI DALAM ROBEK'],
+        ['WO289632','68','RUBBER SKIRT C6A BROBOS']
+      ],
+      'Conveyor 6B': [
+        ['WO294324','20','COVER BREAKER COALPLOUGH 1F C6B RUSAK'],
+        ['WO294323','20','BREAKER COALPLOUGH 1E C6B RUSAK'],
+        ['728258','23','MOTOR COALPLOUGH 2F C6B TIDAK BISA DIOPERASIKAN'],
+        ['WO292104','43','LIMIT COAL PLOUGH 1A C6B HILANG'],
+        ['WO291631','46','CLAMP LIMIT CP1A C6B KENDOR'],
+        ['WO288014','88','RUBBER SKIRT C6B SISI DALAM AUS'],
+        ['WO288662','80','SECONDARY CLEANER C6B HEAD AUS SPRING KOROSIF'],
+        ['WO292207','43','LINE FIRE FIGHTING AREA C6 HEAD BOCOR'],
+        ['WO289640','67','LINE FF AREA C6B TAIL BOCOR'],
+        ['WO287278','100','JALUR C5A KE C6B MENYEBABKAN C6B MISTRACK KE UTARA'],
+        ['WO286191','113','CHUTE BUNKER 1B C6B KONDISI BERLUBANG'],
+        ['WO286190','113','CHUTE BUNKER 1D C6B KONDISI BERLUBANG']
+      ],
+      'Conveyor 7': [
+        ['WO286805','107','AKSES JALAN BAWAH BELT CONVEYOR 7 AMBLES'],
+        ['WO287280','98','SR RETRUN IDLER C7 AREA HEAD'],
+        ['WO295744','7','RUBBER SKIRT CHUTE C7 KE C2B SISI LUAR DEPAN SOBEK']
+      ]
+    };
+
     function buildCHFGrid() {
       var html = '<div class="chf-grid">';
       chfSections.forEach(function(section, sIdx) {
@@ -542,7 +804,7 @@
           html += '<div class="chf-section-title' + (sIdx === 0 ? ' first' : '') + '">' + section.title + '</div>';
         }
         section.items.forEach(function(eq) {
-          html += '<div class="chf-card">';
+          html += '<div class="chf-card" onclick="openWO(\'' + eq.name.replace(/'/g, "\\'") + '\')">';
           if (eq.downtime) html += '<div class="chf-downtime">DOWNTIME</div>';
           html += '<div class="chf-photo"></div>';
           html += '<div class="chf-bottom-row"><div class="chf-name">' + eq.name + '</div><div class="chf-pct ' + pctClass(eq.pct) + '">' + eq.pct.toFixed(0) + '%</div></div>';
@@ -553,31 +815,53 @@
       return html;
     }
 
+    function openWO(name) {
+      var items = woData[name] || [];
+      document.getElementById('woSheetTitle').textContent = name;
+      var listEl = document.getElementById('woList');
+      if (items.length === 0) {
+        listEl.innerHTML = '<div class="wo-empty">Tidak ada SR/WO aktif</div>';
+      } else {
+        listEl.innerHTML = items.map(function(it) {
+          return '<div class="wo-row"><div class="wo-top"><span class="wo-number">' + it[0] + '</span><span class="wo-days">' + it[1] + ' Hari</span></div><div class="wo-desc">' + it[2] + '</div></div>';
+        }).join('');
+      }
+      var dtop = document.querySelector('#detail .dtop');
+      var overlay = document.getElementById('woOverlay');
+      overlay.style.top = dtop.getBoundingClientRect().bottom + 'px';
+      overlay.classList.add('active');
+    }
+    function closeWO() {
+      document.getElementById('woOverlay').classList.remove('active');
+    }
+
     function openDetail(el) {
       var title = el.getAttribute('data-target');
       document.getElementById('detailTitle').textContent = title;
       var subtitleEl = document.getElementById('detailSubtitle');
-      var body = document.getElementById('detailBody');
+      var content = document.getElementById('detailContent');
       var detailEl = document.getElementById('detail');
       detailEl.classList.remove('dark', 'blue');
+      closeWO();
       if (title === 'Nama & NID') {
         var tpl = document.getElementById('namaNidTemplate');
-        body.innerHTML = '';
-        body.appendChild(tpl.content.cloneNode(true));
+        content.innerHTML = '';
+        content.appendChild(tpl.content.cloneNode(true));
         detailEl.classList.add('dark');
         subtitleEl.textContent = '';
       } else if (title === 'Coal Handling Facility') {
-        body.innerHTML = buildCHFGrid();
+        content.innerHTML = buildCHFGrid();
         detailEl.classList.add('blue');
         subtitleEl.textContent = 'Tarikan data terupdate · Pukul 09:00 WIB · By Whatsapp';
       } else {
-        body.innerHTML = '';
+        content.innerHTML = '';
         subtitleEl.textContent = '';
       }
       detailEl.classList.add('active');
     }
     function closeDetail() {
       document.getElementById('detail').classList.remove('active');
+      closeWO();
     }
 
     // Swipe antar halaman menu
