@@ -1,0 +1,2584 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Coal Yard 3D — Stock 23 Juli 2026</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { overflow: hidden; font-family: Arial, sans-serif; background: #1a1a1a; color: #fff; touch-action: manipulation; }
+
+#panel { position: absolute; top: 10px; left: 10px; width: 280px; background: rgba(0,0,0,.90); padding: 11px; border-radius: 10px; z-index: 100; max-height: calc(100vh - 20px); overflow-y: auto; }
+#panel h2 { font-size: 14px; margin-bottom: 7px; color: #fff; }
+
+#slotInfo { background: rgba(15,32,45,.96); border: 1px solid #4fc3f7; padding: 10px 12px; border-radius: 6px; font-size: 11px; display: none; margin-top: 10px; margin-bottom: 10px; }
+#slotInfo h4 { color: #4fc3f7; font-size: 13px; margin-bottom: 6px; border-bottom: 1px solid #2a5876; padding-bottom: 3px; }
+
+/* ===== Donut komposisi area yang sedang di-hover, di bawah judul ===== */
+#hoverDonutWrap { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 8px; background: rgba(255,255,255,.03); border: 1px solid #333; border-radius: 7px; }
+.hoverDonut { flex-shrink: 0; width: 54px; height: 54px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); position: relative; }
+.hoverDonutHole { position: absolute; top: 9px; left: 9px; width: 36px; height: 36px; border-radius: 50%; background: #0c0c0c; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: #4fc3f7; text-align: center; line-height: 1.05; }
+#hoverDonutInfo { flex: 1; min-width: 0; }
+#hoverDonutTitle { font-size: 10.5px; font-weight: bold; color: #fff; margin-bottom: 3px; }
+#hoverDonutLegend { font-size: 9px; color: #ccc; line-height: 1.5; max-height: 70px; overflow-y: auto; }
+#hoverDonutLegend .row { display: flex; justify-content: space-between; gap: 5px; }
+#hoverDonutLegend .row span:last-child { color: #64b5f6; font-family: monospace; }
+.sInfoRow { display: grid; grid-template-columns: 65px 1fr; gap: 5px; font-size: 10.5px; margin: 2px 0; }
+.sInfoRow b { color: #ffd54f; }
+.sInfoShip { padding: 3px 4px; margin: 2px 0; background: rgba(255,255,255,.05); border-left: 3px solid; font-size: 10.5px; }
+
+
+#bottomLeftControls { position: absolute; bottom: 10px; left: 10px; z-index: 100; display: flex; flex-direction: column; width: 260px; gap: 6px; }
+.abtn { width: 100%; padding: 8px; border: 1px solid #555; border-radius: 4px; background: #222; color: #ccc; cursor: pointer; font-size: 12px; transition: 0.2s; }
+.abtn:hover { background: #2e2e2e; }
+.abtn.blue { border-color: #4fc3f7; color: #4fc3f7; font-weight: bold; }
+.abtn.yellow { border-color: #ffd54f; color: #ffd54f; font-weight: bold; }
+
+#legend { position: absolute; top: 10px; right: 10px; width: 260px; background: rgba(0,0,0,.92); padding: 10px; border-radius: 8px; z-index: 100; max-height: calc(100vh - 20px); overflow-y: auto; font-size: 11px; }
+#legend h3 { font-size: 12px; color: #4fc3f7; margin-bottom: 6px; text-transform: uppercase; }
+.capLegend { display: grid; grid-template-columns: 14px 1fr; gap: 6px; align-items: center; font-size: 10.5px; padding: 3px 0; }
+.cL { width: 14px; height: 12px; border-radius: 2px; border: 1px solid rgba(255,255,255,.2); }
+.stotal { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #333; font-size: 11px; }
+.stotal.gt { border-top: 2px solid #4fc3f7; margin-top: 4px; padding-top: 6px; color: #4fc3f7; font-weight: bold; }
+.shipRow { display: grid; grid-template-columns: 14px 55px 1fr 40px; gap: 5px; padding: 4px 3px; align-items: center; border-bottom: 1px solid #222; font-size: 10.5px; cursor: pointer; border-radius: 6px; transition: background .15s, outline .15s; }
+.shipRow:hover { background: rgba(79,195,247,.10); }
+.shipRow.sel { background: linear-gradient(90deg, rgba(79,195,247,.18), transparent); outline: 1px solid rgba(79,195,247,.45); }
+.sc { width: 12px; height: 12px; border-radius: 2px; border: 1px solid rgba(255,255,255,.25); }
+.scode { font-weight: bold; }
+.stonage { text-align: right; color: #64b5f6; font-family: monospace; }
+.skal { color: #ef9a9a; font-size: 9.5px; }
+#filterHint { font-size: 9px; color: #61788c; margin-top: 4px; font-style: italic; }
+
+/* ===== Panel Stacker Reclaimer ===== */
+.srBalanceWrap { margin: 6px 0 10px; }
+.srBalanceBar { display: flex; height: 16px; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+.srBalanceBar .b1 { background: linear-gradient(90deg,#00e5ff,#2979ff); box-shadow: 0 0 8px rgba(0,229,255,.5) inset; }
+.srBalanceBar .b2 { background: linear-gradient(90deg,#ff4da6,#c2185b); box-shadow: 0 0 8px rgba(255,77,166,.5) inset; }
+.srBalanceLbl { display: flex; justify-content: space-between; font-size: 9.5px; color: #aaa; margin-top: 3px; }
+.srCard { background: rgba(255,255,255,.03); border: 1px solid #333; border-radius: 7px; padding: 7px 8px; margin-bottom: 7px; }
+.srCard.breakdown { border-color: #d32f2f; background: rgba(211,47,47,.08); }
+.srCardHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.srCardTitle { font-size: 11px; font-weight: bold; color: #fff; }
+.srBadge { font-size: 8.5px; font-weight: bold; padding: 2px 6px; border-radius: 10px; letter-spacing: .3px; }
+.srBadge.ok { background: rgba(102,187,106,.18); color: #81c784; border: 1px solid #4caf50; }
+.srBadge.down { background: rgba(211,47,47,.2); color: #ef9a9a; border: 1px solid #d32f2f; animation: srPulse 1.4s infinite; }
+@keyframes srPulse { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+.srCardBody { display: flex; gap: 8px; align-items: flex-start; }
+.srPie { flex-shrink: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); }
+.srComp { flex: 1; font-size: 9.5px; color: #ccc; line-height: 1.5; }
+.srComp .row { display: flex; justify-content: space-between; gap: 4px; }
+.srComp .row span:first-child { color: #ddd; }
+.srComp .row span:last-child { color: #64b5f6; font-family: monospace; }
+.srTotal { font-size: 11px; font-weight: bold; color: #4fc3f7; margin-top: 3px; }
+.srNote { font-size: 9px; color: #ef9a9a; margin-top: 4px; font-style: italic; }
+.srEditBtn { font-size: 9px; background: none; border: 1px solid #555; color: #aaa; border-radius: 4px; padding: 2px 7px; cursor: pointer; }
+.srEditBtn:hover { border-color: #4fc3f7; color: #4fc3f7; }
+
+/* ===== Modal edit status SR ===== */
+.srStatusOpt { display: flex; gap: 8px; margin: 8px 0; }
+.srStatusOpt label { flex: 1; display: flex; align-items: center; gap: 5px; border: 1px solid #444; border-radius: 5px; padding: 7px; cursor: pointer; font-size: 11px; }
+.srStatusOpt input[type=radio] { accent-color: #4fc3f7; }
+#srEditModal textarea { width: 100%; background: #1a1a1a; border: 1px solid #444; color: #eee; border-radius: 5px; padding: 6px; font-size: 11px; margin-top: 6px; resize: vertical; min-height: 50px; font-family: Arial, sans-serif; }
+.srSaveBtn { margin-top: 10px; width: 100%; padding: 9px; border: none; border-radius: 5px; background: linear-gradient(135deg,#4fc3f7,#0288d1); color: #052330; font-weight: bold; cursor: pointer; font-size: 12px; }
+
+/* ===== KPI bar (gaya v8) ===== */
+#kpiBar { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 90; pointer-events: none; }
+.kpi { background: rgba(10,16,24,.78); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 8px 16px; min-width: 118px; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,.35); }
+.kpi .l { font-size: 9px; letter-spacing: 1.5px; color: #7f96ab; text-transform: uppercase; }
+.kpi .v { font-size: 17px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.kpi .d { font-size: 9.5px; margin-top: 1px; color: #61788c; }
+.kpi .v.blue { color: #64b5f6; } .kpi .v.red { color: #ef9a9a; } .kpi .v.gold { color: #ffd54f; }
+#kpiTotalCard, #kpiDaysCard { cursor: pointer; pointer-events: auto; user-select: none; -webkit-tap-highlight-color: transparent; transition: transform .12s; }
+#kpiTotalCard:active, #kpiDaysCard:active { transform: scale(0.95); }
+
+/* ===== Fill bar indikator (gaya v8) ===== */
+.fillTrack { height: 6px; background: #16202c; border-radius: 3px; margin: 6px 0 8px; overflow: hidden; }
+.fillTrack i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #4fc3f7, #7c4dff); transition: width .3s; }
+
+/* ===== Modal grafik stock ===== */
+#chartModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; }
+#chartModal .modal-content { max-width: 860px; }
+#stockChart { width: 100%; border-radius: 8px; background: #12181f; cursor: crosshair; }
+.chartLegend { display: flex; gap: 18px; font-size: 10.5px; color: #9fb3c4; margin-top: 8px; align-items: center; }
+.chartLegend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+
+/* ===== Kalibrasi (akses terbatas) ===== */
+#btnKalibrasi { display: none; border-color: #ff9800; color: #ffb74d; font-weight: bold; }
+.abtn.active { background: linear-gradient(135deg, rgba(255,152,0,.28), rgba(255,152,0,.12)); border-color: #ff9800; color: #ffe0b2; }
+.abtn.pickOn { background: linear-gradient(135deg, rgba(255,152,0,.28), rgba(255,152,0,.12)); border-color: #ff9800; color: #ffe0b2; animation: pickPulse 1s infinite; }
+@keyframes pickPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,152,0,.45);} 50%{box-shadow:0 0 0 5px rgba(255,152,0,0);} }
+#calibModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 220; align-items: center; justify-content: center; }
+#calibModal .modal-content { max-width: 480px; border: 1px solid #ff9800; }
+#calibModal .modal-header h3 { color: #ffb74d; }
+.calibBox { background: rgba(255,255,255,.04); border: 1px solid #383838; border-radius: 8px; padding: 10px 12px; margin-bottom: 11px; font-size: 11.5px; }
+.calibBox .lbl { color: #9fb3c4; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+.calibBox .val { color: #ffd54f; font-weight: bold; font-size: 13px; }
+.calibComp { margin-top: 7px; font-size: 10.5px; }
+.calibComp .row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed #333; }
+.calibComp .row b { color: #64b5f6; }
+.calibEmpty { color: #666; font-style: italic; font-size: 10.5px; margin-top: 6px; }
+.calibInput { width: 100%; padding: 8px; background: #141d29; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 13px; margin-top: 4px; }
+.calibResult { background: rgba(76,175,80,.14); border: 1px solid #4caf50; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #a5d6a7; margin-top: 4px; display: none; }
+.calibResult b { color: #c8e6c9; }
+.calibHint { font-size: 9.5px; color: #61788c; margin-top: 3px; }
+
+#calibModeSelect .abtn div { pointer-events: none; }
+#calibToastWrap { position: fixed; top: 74px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.calibToast { padding: 13px 24px; border-radius: 10px; font-size: 14px; font-weight: bold; box-shadow: 0 10px 34px rgba(0,0,0,.55); letter-spacing: .4px; text-align:center; animation: calibToastIn .3s ease; }
+.calibToast.ok { background: linear-gradient(135deg,#43a047,#2e7d32); color: #fff; border: 1px solid #81c784; }
+.calibToast.fail { background: linear-gradient(135deg,#e53935,#b71c1c); color: #fff; border: 1px solid #ef9a9a; }
+.calibToast .sub { display: block; font-weight: normal; font-size: 11px; margin-top: 4px; opacity: .92; letter-spacing: 0; }
+.calibToast.out { opacity: 0; transform: translateY(-10px); transition: .4s; }
+@keyframes calibToastIn { from{opacity:0;transform:translateY(-16px) scale(.94);} to{opacity:1;transform:none;} }
+
+/* ===== Jam aktif + shift indicator ===== */
+#shiftClock { position: absolute; top: 92px; left: 50%; transform: translateX(-50%); background: rgba(10,16,24,.88); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.08); border-radius: 22px; padding: 6px 18px; z-index: 90; font-size: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.35); display: flex; gap: 12px; align-items: center; pointer-events: none; }
+#shiftClock .clkTime { font-family: 'Courier New', monospace; font-weight: bold; color: #64b5f6; font-size: 14px; letter-spacing: 1px; }
+#shiftClock .clkSep { color: #333; }
+#shiftClock .clkInfo { font-size: 11px; color: #c3d3e0; }
+#shiftClock .clkInfo b { color: #81c784; font-weight: bold; }
+#shiftClock .clkInfo .remain { color: #ffd54f; }
+
+/* ===== Sync modal ===== */
+.abtn.green { border-color: #66bb6a; color: #a5d6a7; font-weight: bold; }
+#syncModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.8); z-index: 220; align-items: center; justify-content: center; }
+#syncModal .modal-content { max-width: 520px; border: 1px solid #66bb6a; }
+#syncModal .modal-header h3 { color: #a5d6a7; }
+.syncCard { background: rgba(255,255,255,.04); border: 1px solid #383838; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+.syncCard .lbl { color: #9fb3c4; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.syncCond { font-size: 11.5px; margin: 4px 0; }
+.syncLogRow { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 5px 0; border-bottom: 1px dashed #333; }
+.syncLogRow:last-child { border-bottom: none; }
+.syncLogRow .lLabel { color: #c3d3e0; }
+.syncLogRow.active { background: rgba(129,199,132,.08); padding-left: 6px; padding-right: 6px; margin: 0 -6px; border-radius: 4px; }
+.syncLogRow.active .lLabel::before { content: "▶ "; color: #81c784; }
+.syncPrevRow { font-size: 11.5px; padding: 4px 0; border-bottom: 1px dashed #333; display: flex; justify-content: space-between; }
+.syncPrevRow b { color: #64b5f6; font-family: monospace; }
+#syncPreview { background: rgba(76,175,80,.08); border: 1px solid #4caf50; border-radius: 8px; padding: 12px; margin-top: 8px; display: none; }
+#syncApplyRow { display: none; gap: 6px; margin-top: 8px; }
+#syncApplyRow .abtn { margin-bottom: 0; }
+.syncResetLink { display: block; text-align: center; font-size: 10.5px; color: #7f96ab; text-decoration: underline; margin-top: 8px; cursor: pointer; }
+.syncResetLink:hover { color: #ef9a9a; }
+.syncBigTime { font-family: 'Courier New', monospace; font-size: 24px; font-weight: bold; color: #64b5f6; letter-spacing: 2px; text-align: center; margin-bottom: 4px; }
+.syncFoot { margin-top: 12px; font-size: 9.5px; color: #61788c; line-height: 1.65; border-top: 1px solid #2b2b2b; padding-top: 10px; }
+.syncFoot b { color: #9fb3c4; }
+.syncFoot code { background: #0f151c; padding: 1px 4px; border-radius: 3px; color: #ffd54f; font-size: 10px; }
+
+#statusbar { position: absolute; bottom: 10px; left: 285px; right: 280px; background: rgba(0,0,0,.85); padding: 6px 11px; border-radius: 5px; font-size: 11px; color: #ddd; z-index: 100; pointer-events: none; min-height: 26px; text-align: center; }
+#calibPickHint { display:none; position:absolute; top:10px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#ff9800,#f57c00); color:#1a1200; font-weight:bold; font-size:13px; padding:9px 20px; border-radius:10px; z-index:250; box-shadow:0 8px 26px rgba(0,0,0,.5); pointer-events:none; }
+#calibPickHint span{font-weight:normal;font-size:10.5px;display:block;margin-top:2px;opacity:.85;}
+
+#calModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+.modal-content { background: #222; padding: 20px; border-radius: 10px; width: 95%; max-width: 700px; max-height: 85vh; overflow-y: auto; border: 1px solid #444; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px; }
+.modal-header h3 { font-size: 16px; color: #4fc3f7; }
+.close-btn { cursor: pointer; background: none; border: none; color: #aaa; font-size: 20px; font-weight: bold; }
+.cal-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; margin-bottom: 20px; }
+.cal-table th { background: #333; color: #4fc3f7; padding: 6px; border: 1px solid #444; }
+.cal-table td { padding: 6px; border: 1px solid #444; color: #ddd; }
+.cal-table td.n { text-align: right; font-family: monospace; color: #ef9a9a; }
+.cal-table td.t { text-align: right; font-family: monospace; color: #64b5f6; font-weight: bold; }
+
+@media screen and (max-width: 768px) {
+  #panel { width: 100% !important; top:0; left:0; border-radius: 0; border-bottom: 1px solid #333; max-height: 40vh !important; font-size: 12px !important; }
+  #bottomLeftControls { bottom: 10px; left: 10px; width: calc(100% - 20px); }
+  #legend { display: none !important; }
+  #statusbar { left: 10px; right: 10px; bottom: 85px; }
+}
+
+/* =====================================================================
+   HEXAGON HUD — panel data mengelilingi peta coalyard (tampil di layar lebar)
+   ===================================================================== */
+@media screen and (max-width: 1500px) {
+  .hexPanel { display: none !important; }
+}
+.hexPanel {
+  position: fixed;
+  width: 232px;
+  clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%);
+  background: linear-gradient(160deg, rgba(6,16,26,.95), rgba(14,32,50,.9));
+  border: 1px solid rgba(79,195,247,.35);
+  box-shadow: 0 0 24px rgba(79,195,247,.16), inset 0 0 26px rgba(79,195,247,.05);
+  padding: 30px 24px 24px;
+  z-index: 95;
+  color: #eee;
+  transition: box-shadow .3s, border-color .3s;
+}
+.hexPanel:hover { border-color: rgba(79,195,247,.8); box-shadow: 0 0 34px rgba(79,195,247,.35), inset 0 0 26px rgba(79,195,247,.08); }
+.hexPanel h5 { font-size: 10.5px; color: #4fc3f7; text-align: center; margin: 0 0 9px; text-transform: uppercase; letter-spacing: .5px; }
+.hexBarRow { margin-bottom: 6px; }
+.hexBarRow .lbl { display: flex; justify-content: space-between; font-size: 9.5px; color: #ccc; margin-bottom: 2px; }
+.hexBarRow .lbl span:last-child { color: #64b5f6; font-family: monospace; }
+.hexBarTrack { height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
+.hexBarTrack i { display: block; height: 100%; border-radius: 4px; }
+.hexGaugeWrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.hexGaugeRing { width: 92px; height: 92px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.hexGaugeHole { width: 66px; height: 66px; border-radius: 50%; background: #0a1620; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.hexGaugeHole b { font-size: 15px; color: #fff; }
+.hexGaugeHole span { font-size: 8px; color: #888; }
+.hexGaugeSub { font-size: 9px; color: #999; text-align: center; }
+.hexSRRow { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.hexSRDonut { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); flex-shrink: 0; }
+.hexSRInfo { font-size: 9.5px; line-height: 1.4; }
+.hexSRInfo b { color: #fff; }
+.hexRankRow { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; font-size: 9.5px; }
+.hexRankRow .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.hexRankRow .code { width: 40px; color: #ddd; font-weight: bold; }
+.hexRankBarTrack { flex: 1; height: 7px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
+.hexRankBarTrack i { display: block; height: 100%; border-radius: 4px; }
+.hexRankRow .tn { width: 52px; text-align: right; color: #64b5f6; font-family: monospace; font-size: 9px; }
+.hexStatRow { display: flex; justify-content: space-between; font-size: 9.5px; color: #ccc; padding: 3px 0; border-bottom: 1px dashed rgba(255,255,255,.08); }
+.hexStatRow span:last-child { font-weight: bold; }
+.hexAlertRow { font-size: 9.5px; padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,.08); display: flex; gap: 5px; }
+#hexToggleRow { margin-top: 8px; text-align: right; }
+#hexToggleBtn { font-size: 9px; background: none; border: 1px solid #555; color: #aaa; border-radius: 4px; padding: 2px 7px; cursor: pointer; }
+#hexToggleBtn:hover { border-color: #4fc3f7; color: #4fc3f7; }
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <h2 id="mainTitleH2">🏭 Coal Yard 3D — 23 Jul 2026</h2>
+  <div id="hoverDonutWrap">
+    <div class="hoverDonut" id="hoverDonut" style="background:#2a2a2a;"><div class="hoverDonutHole" id="hoverDonutPct">—</div></div>
+    <div id="hoverDonutInfo">
+      <div id="hoverDonutTitle" style="color:#888;">Arahkan kursor ke area coalyard...</div>
+      <div id="hoverDonutLegend"></div>
+    </div>
+  </div>
+  <div id="slotInfo"></div>
+</div>
+
+<div id="kpiBar">
+  <div class="kpi" id="kpiTotalCard" onclick="kpiTotalClick()"><div class="l">Total Stock</div><div class="v blue" id="kTotal">—</div><div class="d">seluruh coalyard</div></div>
+  <div class="kpi"><div class="l">Kalori Tertimbang</div><div class="v red" id="kKal">—</div><div class="d">GCV ARB</div></div>
+  <div class="kpi"><div class="l">Okupansi Yard</div><div class="v gold" id="kFill">—</div><div class="d">dari 223.778 MT</div></div>
+  <div class="kpi" id="kpiDaysCard" onclick="kpiDaysClick()"><div class="l">Estimasi Cadangan</div><div class="v" id="kDays">—</div><div class="d">burn ±8.437 MT/hari</div></div>
+</div>
+
+<div id="shiftClock">
+  <div class="clkTime" id="clkTime">--:--:--</div>
+  <span class="clkSep">·</span>
+  <div class="clkInfo" id="clkInfo">memuat...</div>
+</div>
+
+<div id="bottomLeftControls">
+  <button class="abtn" id="btnKalibrasi" onclick="openKalibrasi()">🔧 KALIBRASI</button>
+  <button class="abtn green" onclick="openSyncModal()">🌐 TARIK DATA DARI SHEET</button>
+  <button class="abtn blue" onclick="toggleChartModal(true)">📈 Grafik Total Stock (Semua Tanggal)</button>
+  <button class="abtn yellow" onclick="toggleSubLabels()">🏷 Toggle Label Sub-Slot</button>
+  <button class="abtn blue" onclick="toggleModal(true)">📋 Tabel Kalori (Rata2 2026)</button>
+</div>
+
+<div id="legend">
+  <h3>Legenda Kapasitas Area</h3>
+  <div class="capLegend"><div class="cL" style="background:#000000"></div><span>Hitam · 0% (kosong)</span></div>
+  <div class="capLegend"><div class="cL" style="background:#b10202"></div><span>Merah · &gt;0–25%</span></div>
+  <div class="capLegend"><div class="cL" style="background:#ffff00"></div><span>Kuning · &gt;25–50%</span></div>
+  <div class="capLegend"><div class="cL" style="background:#6aa84f"></div><span>Hijau · &gt;50–75%</span></div>
+  <div class="capLegend"><div class="cL" style="background:#11734b"></div><span>Hijau tua · &gt;75–100%</span></div>
+
+  <h3 style="margin-top:10px;">Stock Per Shipper</h3>
+  <div id="shipList"></div>
+  <div id="filterHint">Klik baris shipper untuk menyorot garis area lokasinya di yard.</div>
+  <div id="cyTotals" style="margin-top:8px;"></div>
+
+  <h3 style="margin-top:14px;">⚖️Stacker Reclaimer</h3>
+  <div class="srBalanceWrap">
+    <div class="srBalanceBar" id="srBalanceBar"></div>
+    <div class="srBalanceLbl" id="srBalanceLbl"></div>
+  </div>
+  <div id="srCards"></div>
+</div>
+
+<div id="srEditModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); z-index:210; align-items:center; justify-content:center;">
+  <div class="modal-content" style="max-width:360px;">
+    <div class="modal-header">
+      <h3 id="srEditTitle">✏️ Edit Status Stacker Reclaimer</h3>
+      <button class="close-btn" onclick="closeSRStatusModal()">✕</button>
+    </div>
+    <div class="srStatusOpt">
+      <label><input type="radio" name="srStatusRadio" value="normal" id="srStatusRadioNormal"> 🟢 Normal</label>
+      <label><input type="radio" name="srStatusRadio" value="breakdown" id="srStatusRadioDown"> 🔴 Breakdown</label>
+    </div>
+    <label style="font-size:10.5px; color:#aaa;">Catatan (opsional)</label>
+    <textarea id="srEditNote" placeholder="cth: konveyor macet, menunggu sparepart..."></textarea>
+    <button class="srSaveBtn" onclick="saveSRStatus()">💾 SIMPAN STATUS</button>
+  </div>
+</div>
+
+<div id="statusbar">Arahkan kursor ke coalyard untuk melihat detail sub-slot...</div>
+<div id="calibPickHint"></div>
+
+<div id="calModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📋 Kalori Rata-rata 2026 (GCV ARB)</h3>
+      <button class="close-btn" onclick="toggleModal(false)">✕</button>
+    </div>
+    <h4 id="modalSubtitleDate" style="color:#aaa; font-size:12px; margin-bottom:5px;">Shipper aktif di coalyard 23 Jul 2026</h4>
+    <table class="cal-table">
+      <thead><tr><th>Shipper</th><th>Kode</th><th style="text-align:right">Total (MT)</th><th style="text-align:right">Kalori Rata2 2026</th></tr></thead>
+      <tbody id="calTableActive"></tbody>
+    </table>
+    <h4 style="color:#aaa; font-size:12px; margin-bottom:5px;">Shipper lain (rata-rata 2026)</h4>
+    <table class="cal-table">
+      <thead><tr><th>Kode</th><th>Shipper</th><th style="text-align:right">Kalori Rata2 2026</th><th style="text-align:right">n kapal</th></tr></thead>
+      <tbody>
+        <tr><td><b>BIB</b></td><td>PT. Borneo Indobara QQ PLNBB Niaga</td><td class="n">4,059</td><td class="n">2</td></tr>
+        <tr><td><b>GEMURUH</b></td><td>PT. Gemuruh Karsa</td><td class="n">4,412</td><td class="n">5</td></tr>
+        <tr><td><b>GTMS</b></td><td>PT. Gunung Tabur Mas Sukses</td><td class="n">4,452</td><td class="n">4</td></tr>
+        <tr><td><b>IPC</b></td><td>PT. Internasional Prima Coal</td><td class="n">4,345</td><td class="n">1</td></tr>
+        <tr><td><b>RCT</b></td><td>PT. Rekamitra Cipta Tambang</td><td class="n">4,074</td><td class="n">1</td></tr>
+        <tr><td><b>TIWA</b></td><td>PT. Tiwa Abadi QQ PLNBB Niaga</td><td class="n">3,912</td><td class="n">3</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="chartModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📈 Total Stock Coalyard — Seluruh Tanggal (8 Juni – 26 Juli 2026)</h3>
+      <button class="close-btn" onclick="toggleChartModal(false)">✕</button>
+    </div>
+    <canvas id="stockChart" width="820" height="360"></canvas>
+    <div class="chartLegend">
+      <span><span class="dot" style="background:#4fc3f7;"></span>Data aktual (transaksi tercatat, 8 Juni – 26 Juli 2026)</span>
+      <span><span class="dot" style="background:#9aa7b2;"></span>Proyeksi (antrian tongkang + rata2 pemakaian, dari sheet "ESTIMASI STOCK")</span>
+      <span style="margin-left:auto;color:#61788c;">Arahkan kursor ke grafik untuk nilai harian</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KALIBRASI (akses terbatas) ===== -->
+<div id="calibModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="calibTitle">🔧 KALIBRASI TOTALIZER</h3>
+      <button class="close-btn" onclick="closeKalibrasi()">✕</button>
+    </div>
+    <div class="calibHint" style="margin-bottom:10px;color:#ff9800;">⚠ Fitur akses terbatas — hanya untuk koreksi data internal.</div>
+
+    <!-- ===== Pilihan mode ===== -->
+    <div id="calibModeSelect">
+      <button class="abtn" style="background:linear-gradient(135deg,#ff9800,#f57c00);color:#1a1200;border:none;font-weight:bold;padding:14px;font-size:13px;" onclick="startCalibFlow('transfer')">🔁 PINDAHKAN TONASE<div style="font-weight:normal;font-size:10.5px;margin-top:3px;opacity:.85;">Geser tonase dari satu slot ke slot lain</div></button>
+      <button class="abtn" style="background:linear-gradient(135deg,#e53935,#b71c1c);color:#fff;border:none;font-weight:bold;padding:14px;font-size:13px;margin-top:4px;" onclick="startCalibFlow('delete')">🗑 HAPUS TONASE<div style="font-weight:normal;font-size:10.5px;margin-top:3px;opacity:.85;">Koreksi/kurangi catatan yang melebihi kondisi aktual</div></button>
+    </div>
+
+    <!-- ===== Alur PINDAHKAN TONASE ===== -->
+    <div id="calibTransferView" style="display:none;">
+      <button class="abtn" style="margin-bottom:10px;" onclick="backToModeSelect()">← Kembali ke pilihan mode</button>
+
+      <div class="calibBox">
+        <div class="lbl">1. Slot Area Awal (sumber)</div>
+        <div class="val" id="calibFromLabel">— belum dipilih —</div>
+        <button class="abtn" id="btnPickFrom" onclick="setCalibMode('pickFrom')" style="margin-top:7px;margin-bottom:0;">📍 Klik untuk pilih di coalyard</button>
+        <div class="calibComp" id="calibFromComp"></div>
+      </div>
+
+      <div class="calibBox">
+        <div class="lbl">2. Slot Area Akhir (tujuan)</div>
+        <div class="val" id="calibToLabel">— belum dipilih —</div>
+        <button class="abtn" id="btnPickTo" onclick="setCalibMode('pickTo')" style="margin-top:7px;margin-bottom:0;">📍 Klik untuk pilih di coalyard</button>
+        <div class="calibComp" id="calibToComp"></div>
+      </div>
+
+      <div class="calibBox">
+        <div class="lbl">3. Shipper yang dipindahkan</div>
+        <div class="val" id="calibShipperLabel">— belum dipilih —</div>
+        <button class="abtn" id="btnPickShipper" onclick="setCalibMode('pickShipper')" style="margin-top:7px;margin-bottom:0;">🎯 Klik shipper di tabel kanan</button>
+      </div>
+
+      <div class="calibBox">
+        <div class="lbl">4. Tonase yang dipindahkan (MT)</div>
+        <input type="number" class="calibInput" id="calibTonInput" placeholder="Contoh: 500" min="0">
+        <div class="calibHint" id="calibAvailHint">&nbsp;</div>
+      </div>
+
+      <button class="abtn" style="background:linear-gradient(135deg,#ff9800,#f57c00);color:#1a1200;border:none;font-weight:bold;padding:10px;" onclick="doCalibTransfer()">🔁 Pindahkan Tonase</button>
+    </div>
+
+    <!-- ===== Alur HAPUS TONASE ===== -->
+    <div id="calibDeleteView" style="display:none;">
+      <button class="abtn" style="margin-bottom:10px;" onclick="backToModeSelect()">← Kembali ke pilihan mode</button>
+
+      <div class="calibBox">
+        <div class="lbl">1. Slot Area Awal (sumber)</div>
+        <div class="val" id="calibDelFromLabel">— belum dipilih —</div>
+        <button class="abtn" id="btnPickDelFrom" onclick="setCalibMode('pickDelFrom')" style="margin-top:7px;margin-bottom:0;">📍 Klik untuk pilih di coalyard</button>
+        <div class="calibComp" id="calibDelFromComp"></div>
+      </div>
+
+      <div class="calibBox">
+        <div class="lbl">2. Tonase yang dihapus (MT)</div>
+        <input type="number" class="calibInput" id="calibDelTonInput" placeholder="Contoh: 500" min="0">
+        <div class="calibHint" id="calibDelAvailHint">&nbsp;</div>
+      </div>
+
+      <button class="abtn" style="background:linear-gradient(135deg,#e53935,#b71c1c);color:#fff;border:none;font-weight:bold;padding:10px;" onclick="doCalibDelete()">🗑 Hapus Tonase</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="calibToastWrap"></div>
+
+<!-- ===== SYNC ke Google Sheet ===== -->
+<div id="syncModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>🌐 TARIK DATA DARI GOOGLE SHEET</h3>
+      <button class="close-btn" onclick="closeSyncModal()">✕</button>
+    </div>
+
+    <div class="syncCard">
+      <div class="lbl">Jam Aktif</div>
+      <div class="syncBigTime" id="syncClockTime">--:--:--</div>
+      <div style="text-align:center;font-size:11.5px;color:#c3d3e0;" id="syncClockShift">memuat...</div>
+    </div>
+
+    <div class="syncCard">
+      <div class="lbl">Kondisi Tarik Data</div>
+      <div class="syncCond" id="syncCondActive"></div>
+      <div class="syncCond" id="syncCondLock"></div>
+    </div>
+
+    <div class="syncCard">
+      <div class="lbl">Log Penarikan (3 shift terakhir)</div>
+      <div id="syncLog"></div>
+    </div>
+
+    <button class="abtn" id="btnFetch" style="background:linear-gradient(135deg,#43a047,#2e7d32);color:#fff;border:none;font-weight:bold;padding:11px;" onclick="doFetch()">🌐 Tarik Data Sekarang</button>
+
+    <button class="abtn" id="btnTestConn" onclick="testConnection()" style="border-color:#4fc3f7;color:#4fc3f7;margin-top:6px;">🔬 Test Koneksi (diagnosis)</button>
+    <div id="testConnResult" style="display:none;background:rgba(0,0,0,.35);border:1px solid #383838;border-radius:6px;padding:8px 10px;margin-top:6px;font-size:10.5px;white-space:pre-line;"></div>
+
+    <div id="syncPreview"></div>
+
+    <div id="syncApplyRow">
+      <button class="abtn" style="background:linear-gradient(135deg,#43a047,#2e7d32);color:#fff;border:none;font-weight:bold;padding:11px;flex:1;" onclick="applyPending()">✅ Terapkan</button>
+      <button class="abtn" style="border-color:#666;color:#aaa;padding:11px;flex:1;" onclick="cancelPending()">❌ Batal</button>
+    </div>
+
+    <div class="syncResetLink" onclick="resetShiftLock()">🔓 Reset kunci shift ini (untuk skenario: edit sheet lalu tarik ulang)</div>
+
+    <div class="syncFoot">
+      <b>Persyaratan sheet:</b><br>
+      1. Share <code>Anyone with the link — Viewer</code><br>
+      2. Header kolom harus mengandung kata kunci: <code>SLOT</code>, <code>SHIPPER</code>, <code>TONASE</code> (atau MT), dan <code>TANGGAL</code> (opsional)<br>
+      3. Format slot: <code>CY1-C</code>, <code>CY2-B7</code>, <code>CY2-E3</code>, <code>CY3-A1</code>, dst (spasi/dash/pipe boleh)<br>
+      4. Kode shipper: <code>BA</code>, <code>BNJM</code>, <code>EEI</code>, <code>DGL</code>, ... sesuai kode yang terdaftar<br><br>
+      <b>Aturan shift:</b> setiap shift hanya boleh menarik data 1x. Setelah pergantian shift, tombol aktif kembali otomatis.
+    </div>
+  </div>
+</div>
+
+<!-- ===================== HEXAGON HUD — data ring mengelilingi peta coalyard ===================== -->
+<div class="hexPanel" id="hexZona" style="top:140px; left:8%;">
+  <h5>📦 Stock per Zona</h5>
+  <div id="hexZonaBody"></div>
+</div>
+<div class="hexPanel" id="hexOkupasi" style="top:140px; right:8%;">
+  <h5>🌡️ Okupansi Total Yard</h5>
+  <div id="hexOkupasiBody"></div>
+</div>
+<div class="hexPanel" id="hexSR" style="top:50%; right:1.5%; transform:translateY(-50%);">
+  <h5>🏗️ Keseimbangan SR1 / SR2</h5>
+  <div id="hexSRBody"></div>
+</div>
+<div class="hexPanel" id="hexShipper" style="bottom:120px; right:8%;">
+  <h5>🚢 Top Shipper Terbesar</h5>
+  <div id="hexShipperBody"></div>
+</div>
+<div class="hexPanel" id="hexRingkasan" style="bottom:120px; left:8%;">
+  <h5>📊 Ringkasan Operasional</h5>
+  <div id="hexRingkasanBody"></div>
+</div>
+<div class="hexPanel" id="hexAlert" style="top:50%; left:1.5%; transform:translateY(-50%);">
+  <h5>⚠️ Status &amp; Peringatan</h5>
+  <div id="hexAlertBody"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+var SP_G = 5.0;
+var SP_W = 160 / 13 / 2;
+var XG1  = 169;
+var XG7  = XG1 - 6*SP_G;
+var XP1  = XG7 - SP_G;
+var XP7  = XP1 - 6*SP_W;
+var XP14 = XP1 - 13*SP_W;
+
+var ZCY1s=1,  ZCY1e=25;
+var ZRD1s=26, ZRD1e=30;
+var ZCY2s=31, ZCY2e=65;
+var ZCY2m=48;
+var ZRD2s=66, ZRD2e=70;
+var ZCY3s=71, ZCY3e=95;
+var ZTOT = 97, XTOT = 171;
+
+var zMidCY1  = (ZCY1s+ZCY1e)/2;
+var zMidCY2u = (ZCY2s+ZCY2m)/2;
+var zMidCY2d = (ZCY2m+ZCY2e)/2;
+var zMidCY3  = (ZCY3s+ZCY3e)/2;
+var xBiomass = (139 + 170) / 2;
+
+var AREAS = [
+  {name:'CY1',  x1:0,   x2:XP1,    z1:ZCY1s, z2:ZCY1e, col:0x2e2e2e},
+  {name:'CY2',  x1:0,   x2:XP1,    z1:ZCY2s, z2:ZCY2e, col:0x2e2e2e},
+  {name:'CY3',  x1:0,   x2:XP1,    z1:ZCY3s, z2:ZCY3e, col:0x2e2e2e},
+  {name:'BIO1', x1:XP1, x2:XTOT-1, z1:ZCY1s, z2:ZCY1e, col:0xffc000},
+  // BIO2 dipecah jadi 4 bagian mengelilingi footprint ERH (PAS ukuran box ERH asli, tanpa
+  // margin tambahan) supaya ada LUBANG TANPA WARNA SAMA SEKALI di situ -- ERH x:155-159, z:37-41.
+  {name:'BIO2a', x1:XP1, x2:XTOT-1, z1:ZCY2s, z2:37,     col:0xffc000}, // strip atas (penuh lebar)
+  {name:'BIO2b', x1:XP1, x2:XTOT-1, z1:41,     z2:ZCY2e, col:0xffc000}, // strip bawah (penuh lebar)
+  {name:'BIO2c', x1:XP1, x2:155,    z1:37,     z2:41,     col:0xffc000}, // strip kiri (sejajar lubang)
+  {name:'BIO2d', x1:159, x2:XTOT-1, z1:37,     z2:41,     col:0xffc000}, // strip kanan (sejajar lubang)
+  {name:'BIO3', x1:XP1, x2:XTOT-1, z1:ZCY3s, z2:ZCY3e, col:0xffc000},
+  {name:'RD1',  x1:0,   x2:XTOT-1, z1:ZRD1s, z2:ZRD1e, col:0x444444},
+  {name:'RD2',  x1:0,   x2:XTOT-1, z1:ZRD2s, z2:ZRD2e, col:0x444444}
+];
+
+var SHIPPERS = {
+  'BA':       {name:'PT. Bukit Asam',                     kal:4332, color:'#c62828'},
+  'BNJM':     {name:'PT. Bangun Nusantara Jaya Makmur',   kal:4428, color:'#1565c0'},
+  'EEI':      {name:'PT. Exploitasi Energi Indonesia',    kal:4114, color:'#2e7d32'},
+  'DGL':      {name:'PT. Dwi Guna Laksana',               kal:4112, color:'#ef6c00'},
+  'SGP':      {name:'PT. Singlurus Pratama',              kal:4600, color:'#6a1b9a'},
+  'MADHUCON': {name:'PT. Madhucon Indonesia',             kal:4180, color:'#795548'},
+  'BSPC':     {name:'PT. Bhumi Sriwijaya Perdana Coal',   kal:3988, color:'#546e7a'},
+  'GEL':      {name:'PT. Global Energi Lestari',          kal:4085, color:'#fdd835'},
+  'AI':       {name:'PT. Arutmin Ind. QQ Jhonlin Grp',    kal:3827, color:'#ec407a'},
+  'INDEXIM':  {name:'PT. Indexim Coalindo',               kal:4011, color:'#00acc1'},
+  'BIB':      {name:'PT. Borneo Indobara QQ PLNBB Niaga', kal:4059, color:'#8d6e63'}
+};
+
+// STOCK per 23 Juli 2026 — diperbarui dari logbook unloading/loading 21-23 Jul 2026:
+//  - BNJM: unloading baru CY1-C (4065 MT, 23 Jul), CY3-C (1698 MT, 23 Jul), CY2-C (+1740 MT loading keluar 763 MT, 22 Jul)
+//  - MADHUCON: CY1-C net -636 MT (unload 7605 MT 22 Jul, reclaim 8241 MT 21-23 Jul)
+//  - DGL: CY1-B7 net -258 MT (reclaim), sisanya tidak berubah
+//  - BA: CY2-E net -2676 MT (reclaim dari E1/E2/E3, E1 porsi BA habis)
+//  - SGP: seluruh stok tereklaim habis (loading CY2-E total 3792 MT > sisa stok tercatat 2594 MT)
+//  - BIB: shipper baru aktif, unloading 7252 MT ke CY3-B (23 Jul), net setelah reclaim 3550 MT
+var STOCK = {
+  'CY3|C':  [{code:'BNJM',ton:1698,date:'23 Juli 2026'},{code:'INDEXIM',ton:78,date:'7 Juli 2026'},{code:'BSPC',ton:1319,date:'3 Juli 2026'},{code:'GEL',ton:1296,date:'28 Juni 2026'},{code:'AI',ton:726,date:'25 Juni 2026'}],
+  'CY3|B7': [{code:'BIB',ton:3096,date:'23 Juli 2026'}],
+  'CY3|B6': [{code:'BIB',ton:454,date:'23 Juli 2026'}],
+  'CY3|B3': [{code:'EEI',ton:127,date:'12 Juli 2026'}],
+  'CY3|B2': [{code:'EEI',ton:341,date:'12 Juli 2026'}],
+  'CY2u|C': [{code:'BNJM',ton:9483,date:'22 Juli 2026'}],
+  'CY2d|E3': [{code:'BA',ton:1109,date:'19 Juli 2026'}],
+  'CY2d|E2': [{code:'BA',ton:2421,date:'19 Juli 2026'}],
+  'CY1|C':  [{code:'BNJM',ton:3675,date:'23 Juli 2026'},{code:'MADHUCON',ton:1476,date:'22 Juli 2026'},{code:'DGL',ton:506,date:'8 Juli 2026'},{code:'BSPC',ton:289,date:'4 Juli 2026'}],
+  'CY1|B7': [{code:'DGL',ton:314,date:'8 Juli 2026'}],
+  'CY1|B4': [{code:'DGL',ton:777,date:'18 Juli 2026'}],
+  'CY1|B3': [{code:'DGL',ton:559,date:'18 Juli 2026'}],
+  'CY1|B2': [{code:'DGL',ton:149,date:'18 Juli 2026'}],
+  'CY1|B1': [{code:'DGL',ton:246,date:'18 Juli 2026'},{code:'EEI',ton:2833,date:'10 Juli 2026'}]
+};
+
+var CAPACITY = {
+  'CY3|C':23220,'CY3|B7':3096,'CY3|B6':3096,'CY3|B5':3096,'CY3|B4':3096,'CY3|B3':3096,'CY3|B2':3096,'CY3|B1':3096,'CY3|A6':3096,'CY3|A5':3096,'CY3|A4':3096,'CY3|A3':3096,'CY3|A2':3096,'CY3|A1':3096,
+  'CY2u|C':17715,'CY2u|B7':2362,'CY2u|B6':2362,'CY2u|B5':2362,'CY2u|B4':2362,'CY2u|B3':2362,'CY2u|B2':2362,'CY2u|B1':2362,'CY2u|A6':2362,'CY2u|A5':2362,'CY2u|A4':2362,'CY2u|A3':2362,'CY2u|A2':2362,'CY2u|A1':2362,
+  'CY2d|F':17715,'CY2d|E7':2362,'CY2d|E6':2362,'CY2d|E5':2362,'CY2d|E4':2362,'CY2d|E3':2362,'CY2d|E2':2362,'CY2d|E1':2362,'CY2d|D6':2362,'CY2d|D5':2362,'CY2d|D4':2362,'CY2d|D3':2362,'CY2d|D2':2362,'CY2d|D1':2362,
+  'CY1|C':23220,'CY1|B7':3096,'CY1|B6':3096,'CY1|B5':3096,'CY1|B4':3096,'CY1|B3':3096,'CY1|B2':3096,'CY1|B1':3096,'CY1|A6':3096,'CY1|A5':3096,'CY1|A4':3096,'CY1|A3':3096,'CY1|A2':3096,'CY1|A1':3096
+};
+
+// ===== Status operasional Stacker Reclaimer (persist ke localStorage) =====
+var SR_ZONES = { 1: ['CY1','CY2u'], 2: ['CY2d','CY3'] };
+var SR_STATUS = { 1: {status:'normal', note:''}, 2: {status:'normal', note:''} };
+(function loadSRStatus(){
+  try {
+    var raw = localStorage.getItem('srStatus');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed[1]) SR_STATUS[1] = parsed[1];
+      if (parsed[2]) SR_STATUS[2] = parsed[2];
+    }
+  } catch(e) {}
+})();
+function saveSRStatusToStorage(){ try { localStorage.setItem('srStatus', JSON.stringify(SR_STATUS)); } catch(e) {} }
+
+var scene, camera, renderer, controls, floorMesh, highlightMesh;
+var subLabelSprites = [];
+var subLabelsVisible = true;
+var RC = new THREE.Raycaster(), MV = new THREE.Vector2();
+var srList = [];
+var isDraggingSR = false, draggedSRIndex = -1;
+var isRightMouseDownSR = false, hoveredSRIndex = -1;
+var prevMouseX = 0;
+
+function toggleModal(show) { document.getElementById('calModal').style.display = show ? 'flex' : 'none'; }
+
+function getSubRange(cyKey, sub) {
+  var letter = sub[0];
+  var x1, x2;
+  if (letter === 'C' || letter === 'F') { x1 = 0; x2 = XP14; }
+  else {
+    var num = parseInt(sub.substring(1));
+    var zoneW, zoneE, count;
+    if (letter === 'B' || letter === 'E') { zoneW = XP14; zoneE = XP7; count = 7; }
+    else                                  { zoneW = XP7;  zoneE = XP1; count = 6; }
+    var slotW = (zoneE - zoneW) / count;
+    x1 = zoneE - num * slotW;
+    x2 = zoneE - (num - 1) * slotW;
+  }
+  var zS, zE;
+  if      (cyKey === 'CY1')  { zS = ZCY1s; zE = ZCY1e; }
+  else if (cyKey === 'CY2u') { zS = ZCY2s; zE = ZCY2m; }
+  else if (cyKey === 'CY2d') { zS = ZCY2m; zE = ZCY2e; }
+  else if (cyKey === 'CY3')  { zS = ZCY3s; zE = ZCY3e; }
+  return {x1:x1, x2:x2, z1:zS, z2:zE};
+}
+
+function getSubOfPoint(x, z) {
+  var cyKey;
+  if      (z >= ZCY1s && z <= ZCY1e) cyKey = 'CY1';
+  else if (z >= ZCY2s && z <= ZCY2m) cyKey = 'CY2u';
+  else if (z >  ZCY2m && z <= ZCY2e) cyKey = 'CY2d';
+  else if (z >= ZCY3s && z <= ZCY3e) cyKey = 'CY3';
+  else return null;
+
+  if (x > XP1) return {cy:cyKey, sub:'BIOMASS'};
+
+  var letter;
+  if (cyKey === 'CY2d') {
+    if      (x < XP14) letter = 'F';
+    else if (x < XP7)  letter = 'E';
+    else               letter = 'D';
+  } else {
+    if      (x < XP14) letter = 'C';
+    else if (x < XP7)  letter = 'B';
+    else               letter = 'A';
+  }
+  if (letter === 'C' || letter === 'F') return {cy:cyKey, sub:letter};
+
+  var zoneW, zoneE, count;
+  if (letter === 'B' || letter === 'E') { zoneW = XP14; zoneE = XP7; count = 7; }
+  else                                  { zoneW = XP7;  zoneE = XP1; count = 6; }
+  var slotW = (zoneE - zoneW) / count;
+  var num = Math.floor((zoneE - x) / slotW) + 1;
+  if (num < 1) num = 1;
+  if (num > count) num = count;
+  return {cy:cyKey, sub:letter + num};
+}
+
+function init3D() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1a1a1a);
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 5000);
+  camera.position.set(XTOT+120, 140, ZTOT/2);
+
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.domElement.style.cssText = 'position:absolute;top:0;left:0;z-index:1;touch-action:none;';
+  document.body.appendChild(renderer.domElement);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.set(XTOT/2, 0, ZTOT/2);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.07;
+  controls.screenSpacePanning = true;
+  controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.PAN };
+  controls.minDistance = 10;
+  controls.maxDistance = 1000;
+  controls.maxPolarAngle = Math.PI/2.05;
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+  var dl = new THREE.DirectionalLight(0xffffff, 0.85);
+  dl.position.set(80, 150, 60); dl.castShadow = true; scene.add(dl);
+
+  floorMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(XTOT, ZTOT),
+    new THREE.MeshStandardMaterial({color:0x2e2e2e, side:THREE.DoubleSide})
+  );
+  floorMesh.rotation.x = -Math.PI/2;
+  floorMesh.position.set(XTOT/2, 0, ZTOT/2);
+  floorMesh.receiveShadow = true;
+  scene.add(floorMesh);
+
+  var grid = new THREE.GridHelper(Math.max(XTOT,ZTOT)*1.05, Math.floor(Math.max(XTOT,ZTOT)/10)*10/10*10, 0x444444, 0x2a2a2a);
+  grid.position.set(XTOT/2, 0.01, ZTOT/2);
+  scene.add(grid);
+
+  highlightMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 0.1, 1),
+    new THREE.MeshBasicMaterial({color:0x00ff00, transparent:true, opacity:0.65, depthWrite:false})
+  );
+  highlightMesh.position.y = 0.07;
+  highlightMesh.visible = false;
+  scene.add(highlightMesh);
+
+  buildAreas();
+  buildConveyors();
+  buildBorders();
+  buildPillars();
+  buildZoneBoundaries();
+  buildSubSlotDividers();
+  buildCapacityTiles();
+  buildLabels();
+  buildSubSlotLabels();
+  buildERH();
+  buildStackerReclaimers();
+  setupHover();
+  setupSRInteraction();
+}
+
+function buildConveyors() {
+  var convGeo = new THREE.BoxGeometry(XTOT, 0.6, 1.8);
+  var convMat = new THREE.MeshStandardMaterial({color:0x777777});
+  var c1 = new THREE.Mesh(convGeo, convMat);
+  c1.position.set(XTOT/2, 0.3, (ZRD1s+ZRD1e)/2);
+  scene.add(c1);
+  var c2 = new THREE.Mesh(convGeo, convMat);
+  c2.position.set(XTOT/2, 0.3, (ZRD2s+ZRD2e)/2);
+  scene.add(c2);
+}
+
+function buildAreas() {
+  AREAS.forEach(function(a) {
+    var w = a.x2 - a.x1, d = a.z2 - a.z1;
+    var isBio = a.name.indexOf('BIO')===0;
+    if (isBio) {
+      // Area biomassa: 1 slot area tunggal per zona, gaya kaca holografik sama seperti tile kapasitas,
+      // dinaikkan sedikit di atas garis grid lantai supaya tidak tertimpa garis bantu (kotak-kotak kecil).
+      var tile = new THREE.Mesh(new THREE.BoxGeometry(w, 0.05, d), makeHoloTileMaterial(a.col));
+      tile.position.set(a.x1 + w/2, 0.03, a.z1 + d/2);
+      scene.add(tile);
+      var edge = new THREE.LineSegments(new THREE.EdgesGeometry(tile.geometry), new THREE.LineBasicMaterial({color:tileDisplayColor(a.col), transparent:true, opacity:0.9}));
+      edge.position.copy(tile.position);
+      scene.add(edge);
+      tileMap[a.name]=tile;
+      tileEdgeMap[a.name]=edge;
+    } else {
+      var m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.08, d), new THREE.MeshStandardMaterial({color:a.col}));
+      m.position.set(a.x1 + w/2, -0.04, a.z1 + d/2);
+      scene.add(m);
+    }
+  });
+}
+
+function buildBorders() {
+  function ln(pts, col, op) {
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({color:col, opacity:op, transparent:op<1})));
+  }
+  ln([new THREE.Vector3(0,.1,0),new THREE.Vector3(XTOT,.1,0),new THREE.Vector3(XTOT,.1,ZTOT),new THREE.Vector3(0,.1,ZTOT),new THREE.Vector3(0,.1,0)], 0xffffff, 0.35);
+  AREAS.forEach(function(a) {
+    if (!a.name.startsWith('CY')) return;
+    ln([new THREE.Vector3(a.x1,.12,a.z1),new THREE.Vector3(a.x2,.12,a.z1),new THREE.Vector3(a.x2,.12,a.z2),new THREE.Vector3(a.x1,.12,a.z2),new THREE.Vector3(a.x1,.12,a.z1)], 0x88ff88, 0.45);
+  });
+}
+
+function buildZoneBoundaries() {
+  function vline(x, z1, z2, col, op) {
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.15,z1),new THREE.Vector3(x,.15,z2)]), new THREE.LineBasicMaterial({color:col,opacity:op,transparent:true})));
+  }
+  [{z1:ZCY1s,z2:ZCY1e},{z1:ZCY2s,z2:ZCY2e},{z1:ZCY3s,z2:ZCY3e}].forEach(function(r) {
+    vline(XP1,  r.z1, r.z2, 0xffff00, .70);
+    vline(XP7,  r.z1, r.z2, 0xffff44, .70);
+    vline(XP14, r.z1, r.z2, 0xffff44, .70);
+  });
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,.15,ZCY2m),new THREE.Vector3(XTOT,.15,ZCY2m)]), new THREE.LineBasicMaterial({color:0xffaa00,opacity:.65,transparent:true})));
+}
+
+function buildSubSlotDividers() {
+  function vline(x, z1, z2) {
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.14,z1),new THREE.Vector3(x,.14,z2)]), new THREE.LineBasicMaterial({color:0x4fc3f7,opacity:.55,transparent:true})));
+  }
+  [{zS:ZCY1s,zE:ZCY1e},{zS:ZCY2s,zE:ZCY2m},{zS:ZCY2m,zE:ZCY2e},{zS:ZCY3s,zE:ZCY3e}].forEach(function(g) {
+    var slotWA = (XP1-XP7)/6;
+    for (var i=1;i<6;i++) vline(XP1-i*slotWA, g.zS, g.zE);
+    var slotWB = (XP7-XP14)/7;
+    for (var j=1;j<7;j++) vline(XP7-j*slotWB, g.zS, g.zE);
+  });
+}
+
+var tileMap = {};
+var tileEdgeMap = {};
+function tileDisplayColor(col){
+  return col; // warna komposisi mengikuti persis legenda kapasitas area (termasuk hitam pekat saat kosong)
+}
+function makeHoloTileMaterial(col){
+  // PENTING: MeshBasicMaterial tidak dipengaruhi sudut kamera/pencahayaan sama sekali —
+  // warnanya SELALU konsisten dari sudut manapun (beda dgn MeshPhysicalMaterial+clearcoat
+  // sebelumnya yg kena efek Fresnel: solid dari atas, tapi "menghilang"/jadi reflektif dari sudut miring).
+  // Solid penuh (bukan transparan) -- supaya grid lantai di bawahnya tidak tembus/keliatan
+  // buram di dalam tiap slot. Garis tepi per-slot (EdgesGeometry) tetap terpisah & tidak berubah.
+  // polygonOffset: mendorong tile scr render (bukan posisi fisik) supaya SELALU menang dari
+  // grid lantai di buffer kedalaman, di semua level zoom -- jarak fisik kecil (0.02 unit) saja
+  // tidak cukup diandalkan saat kamera zoom jauh (presisi depth-buffer menurun seiring jarak).
+  return new THREE.MeshBasicMaterial({
+    color: col,
+    side: THREE.DoubleSide,
+    depthWrite: true,
+    polygonOffset: true,
+    polygonOffsetFactor: -4,
+    polygonOffsetUnits: -4
+  });
+}
+function buildCapacityTiles() {
+  var groups = [
+    {key:'CY1',  subs:['C','B7','B6','B5','B4','B3','B2','B1','A6','A5','A4','A3','A2','A1']},
+    {key:'CY2u', subs:['C','B7','B6','B5','B4','B3','B2','B1','A6','A5','A4','A3','A2','A1']},
+    {key:'CY2d', subs:['F','E7','E6','E5','E4','E3','E2','E1','D6','D5','D4','D3','D2','D1']},
+    {key:'CY3',  subs:['C','B7','B6','B5','B4','B3','B2','B1','A6','A5','A4','A3','A2','A1']}
+  ];
+  groups.forEach(function(g) {
+    g.subs.forEach(function(sub) {
+      var key=g.key+'|'+sub;
+      var r = getSubRange(g.key, sub);
+      var cap = CAPACITY[key] || 1;
+      var ships = STOCK[key] || [];
+      var ton = 0; ships.forEach(function(s){ton+=s.ton;});
+      var pct = ton/cap*100;
+      var col = tileColorFor(pct);
+      var w = r.x2-r.x1, d = r.z2-r.z1;
+      // Zona C/F ("Luar") jauh lebih besar drpd sub-slot lain -- kalau dipakaikan margin 6% yg
+      // sama (0.94), celahnya jadi terlihat jauh lebih lebar scr absolut (krn 6% dari ukuran
+      // besar = celah besar). Supaya tidak ada celah di batas P14/Luar, zona C/F dipakaikan
+      // skala penuh (1.0), sub-slot lain tetap 0.94 spt semula.
+      var scaleFactor = (sub==='C'||sub==='F') ? 1.0 : 0.94;
+      var tile = new THREE.Mesh(new THREE.BoxGeometry(w*scaleFactor,0.05,d*scaleFactor), makeHoloTileMaterial(col));
+      tile.position.set(r.x1+w/2, 0.05, r.z1+d/2);
+      scene.add(tile);
+      var edgeColor = (sub==='C'||sub==='F') ? 0xcccccc : col;
+      var edge = new THREE.LineSegments(new THREE.EdgesGeometry(tile.geometry), new THREE.LineBasicMaterial({color:edgeColor, transparent:true, opacity:0.9}));
+      edge.position.copy(tile.position);
+      scene.add(edge);
+      tileMap[key]=tile;
+      tileEdgeMap[key]=edge;
+    });
+  });
+}
+function tileColorFor(pct){
+  if(pct<=0.001) return 0x000000;   // hitam pekat (tetap)
+  if(pct<=25) return 0xb10202;      // merah
+  if(pct<=50) return 0xffff00;      // kuning
+  if(pct<=75) return 0x6aa84f;      // hijau
+  return 0x11734b;                  // hijau tua
+}
+function refreshTileColor(key){
+  if(key.indexOf('BIO')===0) return; // area biomassa tidak punya data kapasitas/stok — warnanya tetap
+  var tile=tileMap[key]; if(!tile) return;
+  var cap=CAPACITY[key]||1;
+  var ton=0; (STOCK[key]||[]).forEach(function(s){ton+=s.ton;});
+  var col=tileColorFor(ton/cap*100);
+  var dCol=tileDisplayColor(col);
+  tile.material.color.setHex(dCol);
+  var edge=tileEdgeMap[key];
+  if(edge) edge.material.color.setHex(dCol);
+}
+
+function buildPillars() {
+  var PH = 4.5;
+  var zN = ZCY1s-1, zS = ZCY3e+1;
+  var geoG = new THREE.CylinderGeometry(0.3,0.35,PH,8);
+  var matG = new THREE.MeshStandardMaterial({color:0x888888});
+  for (var i=0;i<7;i++) {
+    var xg = XG1-i*SP_G;
+    (function(xVal,idx){[zN,zS].forEach(function(z){var p=new THREE.Mesh(geoG,matG);p.position.set(xVal,PH/2,z);p.castShadow=true;scene.add(p);scene.add(makeSprite('P lama '+(idx+1),xVal,PH+1,z,'#6dd6ff',16,2.5));});})(xg,i);
+  }
+  var geoW = new THREE.CylinderGeometry(0.5,0.6,PH,8);
+  var matW = new THREE.MeshStandardMaterial({color:0xdddddd});
+  for (var j=0;j<14;j++) {
+    var xp = XP1-j*SP_W;
+    (function(xVal,idx){[zN,zS].forEach(function(z){var p=new THREE.Mesh(geoW,matW);p.position.set(xVal,PH/2,z);p.castShadow=true;scene.add(p);scene.add(makeSprite('P'+(idx+1),xVal,PH+1,z,'#ffd600',36,5.6));});})(xp,j);
+  }
+}
+
+function buildERH() {
+  var x1=155,x2=159,z1=37,z2=41,w=x2-x1,d=z2-z1,h=1.5;
+  // Lubang tanpa warna sudah dibuat langsung di pemecahan BIO2 (lihat AREAS array) --
+  // tidak perlu patch overlay lagi di sini.
+  var boxGeo = new THREE.BoxGeometry(w,h,d);
+  var erhBox = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({color:0xb10202,transparent:true,opacity:0.35}));
+  erhBox.position.set(x1+w/2,-h/2,z1+d/2);
+  scene.add(erhBox);
+  var wf = new THREE.LineSegments(new THREE.EdgesGeometry(boxGeo), new THREE.LineBasicMaterial({color:0xb10202,linewidth:3}));
+  wf.position.copy(erhBox.position);
+  scene.add(wf);
+  scene.add(makeSprite('ERH',x1+w/2,1.0,z1+d/2,'#ffff00',32,4));
+}
+
+function buildStackerReclaimer(x, z, dirSign, label) {
+  var baseGrp = new THREE.Group();
+  var slewGrp = new THREE.Group();
+  var YEL=0xdcb400, YELD=0xb08e00, DARK=0x2b2b2b, CAB=0x333333;
+  var trackLen=9, trackW=1.2, trackH=0.7;
+  var trackMat = new THREE.MeshStandardMaterial({color:DARK});
+  [-1.3,1.3].forEach(function(zt){
+    var t = new THREE.Mesh(new THREE.BoxGeometry(trackLen,trackH,trackW),trackMat);
+    t.position.set(0,trackH/2,zt); baseGrp.add(t);
+    for(var i=-3;i<=3;i++){var nub=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.14,trackW+0.1),new THREE.MeshStandardMaterial({color:0x161616}));nub.position.set(i*1.2,trackH+0.07,zt);baseGrp.add(nub);}
+  });
+  var ped = new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.9,2.1,8),new THREE.MeshStandardMaterial({color:YELD}));
+  ped.position.set(0,trackH+1.05,0); baseGrp.add(ped);
+  var pivotY = trackH+2.1+0.85;
+  var house = new THREE.Mesh(new THREE.BoxGeometry(2.5,1.7,2.9),new THREE.MeshStandardMaterial({color:YEL}));
+  house.position.set(0,pivotY,0); slewGrp.add(house);
+  var cabWin = new THREE.Mesh(new THREE.BoxGeometry(0.06,0.7,0.9),new THREE.MeshStandardMaterial({color:0x1a2a33}));
+  cabWin.position.set(1.28,pivotY+0.15,-dirSign*0.4); slewGrp.add(cabWin);
+  var boomPivotY = pivotY+0.55;
+  var boomLen=17, boomMat=new THREE.MeshStandardMaterial({color:YEL});
+  var boom = new THREE.Mesh(new THREE.BoxGeometry(1.25,1.25,boomLen),boomMat);
+  boom.position.set(0,boomPivotY,dirSign*boomLen/2); slewGrp.add(boom);
+  var jibLen=6.5;
+  var jib = new THREE.Mesh(new THREE.BoxGeometry(1.05,1.05,jibLen),boomMat);
+  jib.position.set(0,boomPivotY,-dirSign*jibLen/2); slewGrp.add(jib);
+  var cw = new THREE.Mesh(new THREE.BoxGeometry(2.3,1.5,1.9),new THREE.MeshStandardMaterial({color:CAB}));
+  cw.position.set(0,boomPivotY,-dirSign*(jibLen+0.55)); slewGrp.add(cw);
+
+  // ---- A-frame mast + kabel penahan (struktur atap) ----
+  var mastApexY = boomPivotY + 7.4;
+  var mastBaseZ = -dirSign * 1.4;
+  var mastMat = new THREE.MeshStandardMaterial({color:YEL});
+  [-1.05, 1.05].forEach(function(xo) {
+    var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 8.1, 6), mastMat);
+    leg.position.set(xo, boomPivotY + 3.65, mastBaseZ);
+    slewGrp.add(leg);
+  });
+  var apex = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 8), mastMat);
+  apex.position.set(0, mastApexY, mastBaseZ);
+  slewGrp.add(apex);
+
+  function srCable(p1, p2) {
+    var geo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+    slewGrp.add(new THREE.Line(geo, new THREE.LineBasicMaterial({color:0x111111})));
+  }
+  var apexV = new THREE.Vector3(0, mastApexY, mastBaseZ);
+  srCable(apexV, new THREE.Vector3(0, boomPivotY + 0.65, dirSign * boomLen * 0.92));
+  srCable(apexV, new THREE.Vector3(0, boomPivotY + 0.65, dirSign * boomLen * 0.5));
+  srCable(apexV, new THREE.Vector3(0, boomPivotY + 0.65, -dirSign * (jibLen + 0.4)));
+
+  var tipZ = dirSign*boomLen;
+  var wheelGrp = new THREE.Group();
+  var hub = new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,1.0,16),new THREE.MeshStandardMaterial({color:CAB}));
+  hub.rotation.z = Math.PI/2; wheelGrp.add(hub);
+  for (var b=0;b<8;b++){
+    var ang=(b/8)*Math.PI*2;
+    var blade=new THREE.Mesh(new THREE.BoxGeometry(0.2,2.4,0.6),new THREE.MeshStandardMaterial({color:0x8a7300}));
+    blade.position.y=1.6;
+    var bp=new THREE.Group(); bp.rotation.x=ang; bp.add(blade); wheelGrp.add(bp);
+  }
+  wheelGrp.position.set(0,boomPivotY,tipZ); slewGrp.add(wheelGrp);
+  baseGrp.add(makeBadgeSprite(label,0,boomPivotY+10.5,0,30,4.4));
+
+  // ---- Beacon peringatan breakdown (tersembunyi default, dikendalikan refreshSRVisuals) ----
+  var beaconMat = new THREE.MeshStandardMaterial({color:0xff1744, emissive:0xff1744, emissiveIntensity:1.2});
+  var beacon = new THREE.Mesh(new THREE.SphereGeometry(0.4,10,10), beaconMat);
+  beacon.position.set(0, mastApexY+0.7, mastBaseZ);
+  beacon.visible = false;
+  slewGrp.add(beacon);
+  var warnSprite = makeSprite('⚠ BREAKDOWN', 0, boomPivotY+9.3, 0, '#d32f2f', 24, 4.2);
+  warnSprite.visible = false;
+  baseGrp.add(warnSprite);
+
+  baseGrp.add(slewGrp);
+  baseGrp.position.set(x,0,z);
+  scene.add(baseGrp);
+  var srIndex = srList.length;
+  srList.push({base:baseGrp, slew:slewGrp, wheel:wheelGrp, houseMat:house.material, boomMat:boomMat, beacon:beacon, beaconMat:beaconMat, warnSprite:warnSprite, houseColorOrig:house.material.color.getHex(), boomColorOrig:boomMat.color.getHex(), dirSign:dirSign});
+  baseGrp.traverse(function(child){
+    if(child.isMesh){child.userData.isSR=true; child.userData.srIndex=srIndex;}
+  });
+}
+
+function buildStackerReclaimers() {
+  var midX = XP1*0.42;
+  buildStackerReclaimer(midX, (ZRD1s+ZRD1e)/2, -1, 'STACKER RECLAIMER 1');
+  buildStackerReclaimer(midX, (ZRD2s+ZRD2e)/2,  1, 'STACKER RECLAIMER 2');
+  refreshSRVisuals();
+}
+
+// Menyesuaikan tampilan 3D SR (warna & beacon) berdasarkan SR_STATUS
+function refreshSRVisuals(){
+  [1,2].forEach(function(n){
+    var sr=srList[n-1];
+    if(!sr) return;
+    var down = SR_STATUS[n] && SR_STATUS[n].status==='breakdown';
+    sr.beacon.visible = down;
+    sr.warnSprite.visible = down;
+    sr.houseMat.color.setHex(down?0xd32f2f:sr.houseColorOrig);
+    sr.boomMat.color.setHex(down?0xb71c1c:sr.boomColorOrig);
+  });
+}
+
+function makeSprite(txt,x,y,z,color,fs,sw){
+  var fs2=fs||14,sw2=sw||2;
+  var SS=2; // supersampling 2x -- teks lebih tajam di semua level zoom (termasuk zoom jauh)
+  var cw=Math.max(240,fs2*txt.length*0.8),ch=fs2*3.0;
+  var cv=document.createElement('canvas'); cv.width=cw*SS; cv.height=ch*SS;
+  var ctx=cv.getContext('2d');
+  ctx.fillStyle=color||'#fff'; ctx.font='bold '+(fs2*SS)+'px Arial'; ctx.textAlign='center';
+  ctx.fillText(txt,cw*SS/2,ch*SS*.65);
+  var tex=new THREE.CanvasTexture(cv);
+  tex.anisotropy=(typeof renderer!=='undefined'&&renderer)?renderer.capabilities.getMaxAnisotropy():4;
+  var s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false}));
+  s.position.set(x,y,z); s.scale.set(sw2*cw/ch*0.7,sw2*0.7,1); return s;
+}
+// Label berkotak (badge): latar hitam, tulisan putih -- dipakai khusus utk label
+// "STACKER RECLAIMER 1/2" (fungsi terpisah dari makeSprite supaya tidak mengubah
+// tampilan label lain yg memakai makeSprite).
+function makeBadgeSprite(txt,x,y,z,fs,sw){
+  var fs2=fs||30, sw2=sw||4.4;
+  var SS=2; // supersampling 2x -- teks lebih tajam di semua level zoom
+  var measureCv=document.createElement('canvas');
+  var measureCtx=measureCv.getContext('2d');
+  measureCtx.font='bold '+fs2+'px Arial';
+  var textW=measureCtx.measureText(txt).width;
+  var padX=34, padY=20;
+  var cw=textW+padX*2, ch=fs2+padY*2;
+  var cv=document.createElement('canvas'); cv.width=cw*SS; cv.height=ch*SS;
+  var ctx=cv.getContext('2d');
+  ctx.scale(SS,SS);
+  // Gaya sama persis dgn label sub-slot saat di-hover (latar gelap membulat + border & glow emas) --
+  // bedanya teks di sini putih & selalu tampil (bukan cuma muncul saat kursor diarahkan).
+  ctx.fillStyle='rgba(6,10,16,0.88)';
+  roundRectPath(ctx,0,0,cw,ch,18); ctx.fill();
+  ctx.lineWidth=3; ctx.strokeStyle='rgba(255,213,79,0.95)';
+  roundRectPath(ctx,0,0,cw,ch,18); ctx.stroke();
+  ctx.shadowColor='rgba(255,213,79,0.85)'; ctx.shadowBlur=14;
+  ctx.fillStyle='#ffffff';
+  ctx.font='bold '+fs2+'px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(txt,cw/2,ch/2);
+  ctx.shadowBlur=0;
+  var tex=new THREE.CanvasTexture(cv);
+  tex.anisotropy=(typeof renderer!=='undefined'&&renderer)?renderer.capabilities.getMaxAnisotropy():4;
+  var s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
+  var scaleH=sw2*0.7, scaleW=scaleH*cw/ch;
+  s.position.set(x,y,z); s.scale.set(scaleW,scaleH,1);
+  return s;
+}
+
+function makeBiomassSprite(subLabel,x,y,z,sw){
+  var SS=2;
+  var cv=document.createElement('canvas'); cv.width=650*SS; cv.height=180*SS;
+  var ctx=cv.getContext('2d'); ctx.textAlign='center'; ctx.scale(SS,SS);
+  ctx.font='bold 56px Arial'; ctx.fillStyle='#000000'; ctx.fillText('BIOMASSA',325,60);
+  ctx.font='bold 56px Arial'; ctx.fillStyle='#666666'; ctx.fillText(subLabel,325,130);
+  var tex=new THREE.CanvasTexture(cv);
+  tex.anisotropy=(typeof renderer!=='undefined'&&renderer)?renderer.capabilities.getMaxAnisotropy():4;
+  var s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
+  s.position.set(x,2.0,z); s.scale.set(sw*650/180,sw,1); return s;
+}
+
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+var subLabelMap = {};      // key -> {sprite, normalTex, hoverTex, baseW, baseH}
+var currentLabelHoverKey = null;
+function makeSubSlotLabel(txt,x,y,z,key){
+  var W=640,H=150;
+  var SS=2; // supersampling 2x -- teks lebih tajam di semua level zoom
+  function buildTex(hover){
+    var cv=document.createElement('canvas'); cv.width=W*SS; cv.height=H*SS;
+    var ctx=cv.getContext('2d');
+    ctx.scale(SS,SS);
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='bold 58px Arial';
+    if(hover){
+      // Latar pil gelap + border + glow kuning-emas: kontras tinggi & tetap terbaca
+      // di atas warna tile APAPUN (hitam/merah/oranye/hijau) saat sedang di-hover.
+      var textW=ctx.measureText(txt).width;
+      var pillW=Math.min(W-8, textW+70);
+      var pillH=86;
+      var rx=(W-pillW)/2, ry=(H-pillH)/2;
+      ctx.fillStyle='rgba(6,10,16,0.88)';
+      roundRectPath(ctx,rx,ry,pillW,pillH,18); ctx.fill();
+      ctx.lineWidth=3; ctx.strokeStyle='rgba(255,213,79,0.95)';
+      roundRectPath(ctx,rx,ry,pillW,pillH,18); ctx.stroke();
+      ctx.shadowColor='rgba(255,213,79,0.85)'; ctx.shadowBlur=14;
+      ctx.fillStyle='#ffffff';
+      ctx.fillText(txt,W/2,H/2);
+      ctx.shadowBlur=0;
+    } else {
+      ctx.fillStyle='rgba(255,255,255,.98)';
+      ctx.fillText(txt,W/2,H/2);
+    }
+    var tex=new THREE.CanvasTexture(cv);
+    tex.anisotropy=(typeof renderer!=='undefined'&&renderer)?renderer.capabilities.getMaxAnisotropy():4;
+    return tex;
+  }
+  var normalTex=buildTex(false), hoverTex=buildTex(true);
+  var s=new THREE.Sprite(new THREE.SpriteMaterial({map:normalTex,depthTest:false,transparent:true,opacity:0.95}));
+  var baseW=18, baseH=18*H/W;
+  s.position.set(x,y,z); s.scale.set(baseW,baseH,1);
+  subLabelMap[key]={sprite:s,normalTex:normalTex,hoverTex:hoverTex,baseW:baseW,baseH:baseH};
+  return s;
+}
+function setHoveredLabel(newKey){
+  if(newKey===currentLabelHoverKey) return;
+  if(currentLabelHoverKey && subLabelMap[currentLabelHoverKey]){
+    var o=subLabelMap[currentLabelHoverKey];
+    o.sprite.material.map=o.normalTex; o.sprite.material.needsUpdate=true;
+    o.sprite.scale.set(o.baseW,o.baseH,1);
+  }
+  if(newKey && subLabelMap[newKey]){
+    var n=subLabelMap[newKey];
+    n.sprite.material.map=n.hoverTex; n.sprite.material.needsUpdate=true;
+    n.sprite.scale.set(n.baseW*1.1,n.baseH*1.1,1);
+  }
+  currentLabelHoverKey=newKey;
+}
+
+function makeSmallLabel(txt,x,y,z,color){
+  var SS=2;
+  var cv=document.createElement('canvas'); cv.width=600*SS; cv.height=100*SS;
+  var ctx=cv.getContext('2d'); ctx.textAlign='center'; ctx.scale(SS,SS);
+  ctx.font='bold 56px Arial'; ctx.fillStyle=color||'rgba(255,255,255,.98)';
+  ctx.fillText(txt,300,70);
+  var tex=new THREE.CanvasTexture(cv);
+  tex.anisotropy=(typeof renderer!=='undefined'&&renderer)?renderer.capabilities.getMaxAnisotropy():4;
+  var s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true,opacity:0.95}));
+  s.position.set(x,y,z); s.scale.set(18,18*100/600,1); return s;
+}
+
+function buildLabels() {
+  scene.add(makeBiomassSprite('SEKAM PADI',   xBiomass, 2.5, zMidCY1, 4.0));
+  scene.add(makeBiomassSprite('SAWDUST',       xBiomass, 2.5, (ZCY2s+ZCY2e)/2, 4.0));
+  scene.add(makeBiomassSprite('BONGGOL JAGUNG',xBiomass, 2.5, zMidCY3, 4.0));
+
+  function dir(t,x,z){
+    scene.add(makeBadgeSprite(t,x,1.5,z,58,4.4));
+  }
+  dir('BARAT',   -25,       ZTOT/2);
+  dir('TIMUR',   XTOT+25,   ZTOT/2);
+  dir('UTARA',   XTOT/2,    -20);
+  dir('SELATAN', XTOT/2,    ZTOT+20);
+
+  function blk(t,x,z){
+    var SS=2;
+    var cv=document.createElement('canvas'); cv.width=400*SS; cv.height=100*SS;
+    var ctx=cv.getContext('2d'); ctx.font='bold 80px Arial'; ctx.textAlign='center'; ctx.scale(SS,SS);
+    ctx.fillStyle='rgba(255,255,255,1)'; ctx.fillText(t,200,75);
+    var tex=new THREE.CanvasTexture(cv);
+    tex.anisotropy=(typeof renderer!=='undefined'&&renderer)?renderer.capabilities.getMaxAnisotropy():4;
+    var s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,opacity:1,transparent:true,depthTest:false}));
+    s.position.set(x,1.5,z); s.scale.set(20,20*100/400,1); scene.add(s);
+  }
+  var labX = XTOT+12;
+  blk('CY1', labX, zMidCY1);
+  blk('CY2', labX, (ZCY2s+ZCY2e)/2);
+  blk('CY3', labX, zMidCY3);
+
+  var cv=document.createElement('canvas'); cv.width=2000; cv.height=320;
+  var ctx=cv.getContext('2d'); ctx.textAlign='center';
+  ctx.font='bold 108px Arial';
+  var titleGrad=ctx.createLinearGradient(300,0,1700,0);
+  titleGrad.addColorStop(0,'#4fc3f7'); titleGrad.addColorStop(1,'#9c6bff');
+  ctx.fillStyle=titleGrad;
+  ctx.fillText('COALYARD OPERATIONS 3D',1000,140);
+  ctx.font='42px Arial';
+  ctx.fillStyle='rgba(190,196,210,.9)';
+  ctx.fillText('P L T U   T A N J U N G   A W A R - A W A R',1000,210);
+  var lineGrad=ctx.createLinearGradient(650,0,1350,0);
+  lineGrad.addColorStop(0,'rgba(79,195,247,0)'); lineGrad.addColorStop(0.5,'rgba(156,107,255,.9)'); lineGrad.addColorStop(1,'rgba(79,195,247,0)');
+  ctx.fillStyle=lineGrad;
+  ctx.fillRect(650,240,700,4);
+  var titleTex=new THREE.CanvasTexture(cv);
+  var titleMat=new THREE.MeshBasicMaterial({map:titleTex,transparent:true,depthTest:false,side:THREE.DoubleSide});
+  var titleW=170, titleH=titleW*320/2000;
+  var titleMesh=new THREE.Mesh(new THREE.PlaneGeometry(titleW,titleH), titleMat);
+  titleMesh.position.set(-100,14,ZTOT/2);
+  titleMesh.rotation.y=Math.PI/2; // menghadap tetap ke arah yard (+X), tidak ikut berputar mengikuti kamera
+  scene.add(titleMesh);
+}
+
+function buildSubSlotLabels() {
+  var groups=[{key:'CY1',zS:ZCY1s,zE:ZCY1e},{key:'CY2u',zS:ZCY2s,zE:ZCY2m},{key:'CY2d',zS:ZCY2m,zE:ZCY2e},{key:'CY3',zS:ZCY3s,zE:ZCY3e}];
+  groups.forEach(function(g){
+    var zCenter=(g.zS+g.zE)/2;
+    var cyName=g.key.replace('u','').replace('d','');
+    var letterA=(g.key==='CY2d')?'D':'A';
+    var slotWA=(XP1-XP7)/6;
+    for(var i=1;i<=6;i++){
+      var xC=XP1-(i-0.5)*slotWA, slotCode=letterA+i;
+      var lbl=makeSubSlotLabel(cyName+' - '+slotCode,xC,3.5,zCenter,g.key+'|'+slotCode);
+      subLabelSprites.push(lbl); scene.add(lbl);
+    }
+    var letterB=(g.key==='CY2d')?'E':'B';
+    var slotWB=(XP7-XP14)/7;
+    for(var j=1;j<=7;j++){
+      var xC2=XP7-(j-0.5)*slotWB, slotCode2=letterB+j;
+      var lbl2=makeSubSlotLabel(cyName+' - '+slotCode2,xC2,3.5,zCenter,g.key+'|'+slotCode2);
+      subLabelSprites.push(lbl2); scene.add(lbl2);
+    }
+    var letterC=(g.key==='CY2d')?'F':'C';
+    var lbl3=makeSubSlotLabel(cyName+' - '+letterC,XP14/2,3.5,zCenter,g.key+'|'+letterC);
+    subLabelSprites.push(lbl3); scene.add(lbl3);
+  });
+}
+
+function toggleSubLabels(){
+  subLabelsVisible=!subLabelsVisible;
+  subLabelSprites.forEach(function(s){s.visible=subLabelsVisible;});
+}
+
+function setupSRInteraction() {
+  var canvas = renderer.domElement;
+  canvas.addEventListener('pointerdown', function(e){
+    var r=canvas.getBoundingClientRect();
+    MV.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+    RC.setFromCamera(MV,camera);
+    var hits=RC.intersectObjects(scene.children,true);
+    var hitIdx=-1;
+    for(var i=0;i<hits.length;i++){if(hits[i].object.userData&&hits[i].object.userData.isSR){hitIdx=hits[i].object.userData.srIndex;break;}}
+    if(hitIdx!==-1){
+      if(e.button===0){isDraggingSR=true;draggedSRIndex=hitIdx;prevMouseX=e.clientX;controls.enabled=false;}
+      else if(e.button===2){isRightMouseDownSR=true;hoveredSRIndex=hitIdx;controls.enabled=false;}
+    }
+  });
+  window.addEventListener('pointerup',function(){isDraggingSR=false;isRightMouseDownSR=false;controls.enabled=true;});
+  window.addEventListener('pointermove',function(e){
+    if(isDraggingSR&&draggedSRIndex!==-1){
+      var dx=e.clientX-prevMouseX;
+      var sr=srList[draggedSRIndex];
+      sr.slew.rotation.y-=dx*0.01;
+      sr.slew.rotation.y=Math.max(-Math.PI,Math.min(Math.PI,sr.slew.rotation.y));
+      prevMouseX=e.clientX;
+    }
+  });
+  canvas.addEventListener('contextmenu',function(e){e.preventDefault();});
+  canvas.addEventListener('wheel',function(e){
+    if(isRightMouseDownSR&&hoveredSRIndex!==-1){
+      var sr=srList[hoveredSRIndex];
+      sr.base.position.x+=(e.deltaY<0)?-2.0:2.0;
+      sr.base.position.x=Math.max(0,Math.min(XTOT,sr.base.position.x));
+      e.preventDefault(); e.stopPropagation();
+    }
+  },{passive:false});
+}
+
+function setupHover() {
+  var canvas = renderer.domElement;
+  canvas.addEventListener('pointermove', function(e){
+    if(e.pointerType==='touch') return;
+    var r=canvas.getBoundingClientRect();
+    MV.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+    RC.setFromCamera(MV,camera);
+    var h=RC.intersectObject(floorMesh,false);
+    var sb=document.getElementById('statusbar');
+    var info=document.getElementById('slotInfo');
+    if(!h.length){sb.textContent='Arahkan kursor ke coalyard untuk melihat detail sub-slot...';info.style.display='none';highlightMesh.visible=false;lastHoverKey=null;resetHoverDonut();setHoveredLabel(null);return;}
+    var x=h[0].point.x, z=h[0].point.z;
+    var sInfo=getSubOfPoint(x,z);
+    if(!sInfo){sb.textContent='Di luar coalyard';info.style.display='none';highlightMesh.visible=false;lastHoverKey=null;resetHoverDonut();setHoveredLabel(null);return;}
+    var prettyCy=sInfo.cy.replace('CY2u','CY2 - ABC').replace('CY2d','CY2 - DEF').replace('CY1','CY1 - ABC').replace('CY3','CY3 - ABC');
+    if(sInfo.sub==='BIOMASS'){sb.textContent=prettyCy+' · Area Biomassa / P lama  |  X:'+x.toFixed(1)+' Z:'+z.toFixed(1);info.style.display='none';highlightMesh.visible=false;lastHoverKey=null;updateHoverDonut(prettyCy+' · Area Biomassa',[],0);setHoveredLabel(null);return;}
+    var rBox=getSubRange(sInfo.cy,sInfo.sub);
+    var wBox=rBox.x2-rBox.x1, dBox=rBox.z2-rBox.z1;
+    highlightMesh.scale.set(wBox*0.96,1,dBox*0.96);
+    highlightMesh.position.set(rBox.x1+wBox/2,0.07,rBox.z1+dBox/2);
+    highlightMesh.visible=true;
+    var key=sInfo.cy+'|'+sInfo.sub;
+    lastHoverKey=key;
+    setHoveredLabel(key);
+    if(calibMode==='pickFrom'||calibMode==='pickTo'||calibMode==='pickDelFrom'){
+      var lbl=calibMode==='pickFrom'?'🟠 Pilih SLOT AWAL: ':calibMode==='pickTo'?'🟣 Pilih SLOT TUJUAN: ':'🔴 Pilih SLOT YANG DIKOREKSI: ';
+      sb.textContent=lbl+prettyCy+' · '+sInfo.sub+' — klik untuk konfirmasi (ESC untuk batal)';
+      return;
+    }
+    var MONTHS_ID_SORT={'Januari':0,'Februari':1,'Maret':2,'April':3,'Mei':4,'Juni':5,'Juli':6,'Agustus':7,'September':8,'Oktober':9,'November':10,'Desember':11};
+    function parseIndoDateForSort(str){
+      if(!str||str==='-') return -1; // tak ada tanggal -> taruh paling akhir
+      var m=String(str).match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+      if(!m||MONTHS_ID_SORT[m[2]]===undefined) return -1;
+      return new Date(parseInt(m[3],10),MONTHS_ID_SORT[m[2]],parseInt(m[1],10)).getTime();
+    }
+    var ships=(STOCK[key]||[]).slice().sort(function(a,b){return parseIndoDateForSort(b.date)-parseIndoDateForSort(a.date);});
+    var cap=CAPACITY[key]||0;
+    var ton=0; ships.forEach(function(s){ton+=s.ton;});
+    var pct=cap>0?(ton/cap*100).toFixed(1):0;
+    sb.textContent=prettyCy+' · Sub-slot '+sInfo.sub+' · '+ton.toLocaleString('id-ID')+' / '+cap.toLocaleString('id-ID')+' MT ('+pct+'%)  |  X:'+x.toFixed(1)+' Z:'+z.toFixed(1);
+    updateHoverDonut(prettyCy+' · Sub-slot '+sInfo.sub, ships, pct);
+    var html='<h4>'+prettyCy+'  ·  Sub-slot '+sInfo.sub+'</h4>';
+    html+='<div class="sInfoRow"><b>Kapasitas</b><span>'+cap.toLocaleString('id-ID')+' MT</span></div>';
+    html+='<div class="sInfoRow"><b>Terisi</b><span>'+ton.toLocaleString('id-ID')+' MT  ('+pct+'%)</span></div>';
+    html+='<div class="fillTrack"><i style="width:'+Math.min(100,parseFloat(pct))+'%"></i></div>';
+    if(ships.length){
+      html+='<div style="margin-top:6px;font-size:10px;color:#aaa;">SHIPPER (terbaru di atas):</div>';
+      ships.forEach(function(s){
+        var meta=SHIPPERS[s.code]||{name:s.code,kal:'-',color:'#888'};
+        html+='<div class="sInfoShip" style="border-color:'+meta.color+'"><b style="color:#fff">'+s.code+'</b> <span style="color:#aaa">· '+meta.name+'</span><br><span style="color:#64b5f6;font-weight:bold;">'+s.ton.toLocaleString('id-ID')+' MT</span> · <span style="color:#ef9a9a;">Kal '+meta.kal+'</span> · <span style="color:#888;">'+s.date+'</span></div>';
+      });
+    } else {html+='<div style="color:#666;font-style:italic;margin-top:4px;">(sub-slot kosong)</div>';}
+    info.innerHTML=html; info.style.display='block';
+  },false);
+  canvas.addEventListener('pointerleave',function(){document.getElementById('slotInfo').style.display='none';highlightMesh.visible=false;resetHoverDonut();setHoveredLabel(null);},false);
+  canvas.addEventListener('click',function(e){
+    var key=lastHoverKey;
+    if(!key){
+      var r=canvas.getBoundingClientRect();
+      MV.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+      RC.setFromCamera(MV,camera);
+      var h=RC.intersectObject(floorMesh,false);
+      if(h.length){
+        var sInfo=getSubOfPoint(h[0].point.x,h[0].point.z);
+        if(sInfo&&sInfo.sub!=='BIOMASS') key=sInfo.cy+'|'+sInfo.sub;
+      }
+    }
+    if(!key) return;
+    if(calibMode==='pickFrom'){
+      calibFromKey=key;
+      reopenCalibAfterPick();
+    } else if(calibMode==='pickTo'){
+      calibToKey=key;
+      reopenCalibAfterPick();
+    } else if(calibMode==='pickDelFrom'){
+      calibDelFromKey=key;
+      reopenCalibAfterPick();
+    }
+  },false);
+}
+
+// =========================================================================
+// KALIBRASI TOTALIZER (akses terbatas — unlock via 10x klik KPI)
+// =========================================================================
+var calibTotalClicks=0, calibDaysClicks=0, calibUnlocked=false;
+var calibFlow=null;                 // null | 'transfer' | 'delete'
+var calibMode=null;                 // null | 'pickFrom' | 'pickTo' | 'pickShipper' | 'pickDelFrom'
+var calibFromKey=null, calibToKey=null, calibShipperCode=null, calibDelFromKey=null;
+var lastHoverKey=null;
+var calibFromMarker=null, calibToMarker=null, calibDelMarker=null;
+
+function kpiTotalClick(){
+  calibTotalClicks++;
+  if(calibTotalClicks>=10){
+    calibTotalClicks=0;
+    calibUnlocked=true;
+    document.getElementById('btnKalibrasi').style.display='block';
+    flashKpi('kpiTotalCard','#4fc3f7');
+  }
+}
+function kpiDaysClick(){
+  calibDaysClicks++;
+  if(calibDaysClicks>=10){
+    calibDaysClicks=0;
+    calibUnlocked=false;
+    document.getElementById('btnKalibrasi').style.display='none';
+    closeKalibrasi();
+    flashKpi('kpiDaysCard','#888');
+  }
+}
+function flashKpi(id,color){
+  var el=document.getElementById(id);
+  el.style.boxShadow='0 0 0 2px '+color;
+  setTimeout(function(){el.style.boxShadow='';},400);
+}
+
+function prettyCyKey(cy){
+  return cy.replace('CY2u','CY2 - ABC').replace('CY2d','CY2 - DEF').replace('CY1','CY1 - ABC').replace('CY3','CY3 - ABC');
+}
+function prettySlotName(key){
+  if(!key) return '— belum dipilih —';
+  var p=key.split('|');
+  return prettyCyKey(p[0])+' · Sub-slot '+p[1];
+}
+
+// ---------- Toast notifikasi BERHASIL / GAGAL ----------
+function calibToast(ok,title,sub){
+  var wrap=document.getElementById('calibToastWrap');
+  var el=document.createElement('div');
+  el.className='calibToast '+(ok?'ok':'fail');
+  el.innerHTML=(ok?'✅ ':'❌ ')+title+(sub?'<span class="sub">'+sub+'</span>':'');
+  wrap.appendChild(el);
+  setTimeout(function(){
+    el.classList.add('out');
+    setTimeout(function(){el.remove();},450);
+  },3600);
+}
+
+// ---------- Buka / tutup / navigasi modal ----------
+function openKalibrasi(){
+  document.getElementById('calibModal').style.display='flex';
+  backToModeSelect();
+}
+function closeKalibrasi(){
+  document.getElementById('calibModal').style.display='none';
+  exitPickMode();
+}
+function backToModeSelect(){
+  calibFlow=null;
+  exitPickMode();
+  document.getElementById('calibModal').style.display='flex';
+  document.getElementById('calibModeSelect').style.display='block';
+  document.getElementById('calibTransferView').style.display='none';
+  document.getElementById('calibDeleteView').style.display='none';
+  document.getElementById('calibTitle').textContent='🔧 KALIBRASI TOTALIZER';
+}
+function startCalibFlow(flow){
+  calibFlow=flow;
+  calibFromKey=null; calibToKey=null; calibShipperCode=null; calibDelFromKey=null;
+  updateCalibMarker('from',null); updateCalibMarker('to',null); updateCalibMarker('del',null);
+  document.getElementById('calibModeSelect').style.display='none';
+  if(flow==='transfer'){
+    document.getElementById('calibTransferView').style.display='block';
+    document.getElementById('calibDeleteView').style.display='none';
+    document.getElementById('calibTitle').textContent='🔁 PINDAHKAN TONASE';
+    renderCalibPanel();
+  }else{
+    document.getElementById('calibTransferView').style.display='none';
+    document.getElementById('calibDeleteView').style.display='block';
+    document.getElementById('calibTitle').textContent='🗑 HAPUS TONASE';
+    renderDeletePanel();
+  }
+}
+
+// ---------- Mode pilih slot/shipper — modal DISEMBUNYIKAN sementara ----------
+function setCalibMode(mode){
+  calibMode=mode;
+  var hint=document.getElementById('calibPickHint');
+  var texts={
+    pickFrom:['📍 Klik area SLOT AWAL di coalyard','Arahkan kursor lalu klik salah satu sub-slot · ESC untuk batal'],
+    pickTo:['📍 Klik area SLOT TUJUAN di coalyard','Arahkan kursor lalu klik salah satu sub-slot · ESC untuk batal'],
+    pickDelFrom:['📍 Klik area SLOT yang akan dikoreksi','Arahkan kursor lalu klik salah satu sub-slot · ESC untuk batal'],
+    pickShipper:['🎯 Klik shipper di tabel kanan','Pilih salah satu baris pada panel Stock Per Shipper · ESC untuk batal']
+  };
+  if(texts[mode]){
+    hint.innerHTML=texts[mode][0]+'<span>'+texts[mode][1]+'</span>';
+    hint.style.display='block';
+  }
+  document.getElementById('calibModal').style.display='none';   // menu tidak mengganggu layar
+}
+function exitPickMode(){
+  calibMode=null;
+  document.getElementById('calibPickHint').style.display='none';
+}
+function reopenCalibAfterPick(){
+  document.getElementById('calibModal').style.display='flex';   // auto muncul lagi, lanjut step berikutnya
+  exitPickMode();
+  if(calibFlow==='transfer') renderCalibPanel();
+  else if(calibFlow==='delete') renderDeletePanel();
+}
+
+// ---------- Tampilan komposisi shipper suatu slot ----------
+function compositionHtml(key){
+  if(!key) return '';
+  var ships=STOCK[key]||[];
+  if(!ships.length) return '<div class="calibEmpty">(sub-slot ini kosong)</div>';
+  var html='<div class="calibComp">';
+  ships.forEach(function(s){
+    var meta=SHIPPERS[s.code]||{name:s.code,color:'#888'};
+    html+='<div class="row"><span style="color:'+meta.color+'">● '+s.code+'</span><b>'+s.ton.toLocaleString('id-ID')+' MT</b></div>';
+  });
+  html+='</div>';
+  return html;
+}
+function slotTotal(key){
+  var t=0; (STOCK[key]||[]).forEach(function(s){t+=s.ton;}); return t;
+}
+
+// ---------- Render panel PINDAHKAN ----------
+function renderCalibPanel(){
+  document.getElementById('calibFromLabel').textContent=prettySlotName(calibFromKey);
+  document.getElementById('calibFromComp').innerHTML=compositionHtml(calibFromKey);
+  document.getElementById('calibToLabel').textContent=prettySlotName(calibToKey);
+  document.getElementById('calibToComp').innerHTML=compositionHtml(calibToKey);
+  var shipEl=document.getElementById('calibShipperLabel');
+  if(calibShipperCode){
+    var meta=SHIPPERS[calibShipperCode]||{name:calibShipperCode,color:'#888'};
+    shipEl.innerHTML='<span style="color:'+meta.color+'">● '+calibShipperCode+'</span> — '+meta.name;
+  } else {
+    shipEl.textContent='— belum dipilih —';
+  }
+  var hint=document.getElementById('calibAvailHint');
+  if(calibFromKey&&calibShipperCode){
+    var entry=null;
+    (STOCK[calibFromKey]||[]).forEach(function(s){if(s.code===calibShipperCode)entry=s;});
+    var capTo=calibToKey?(CAPACITY[calibToKey]||0):null;
+    var usedTo=calibToKey?slotTotal(calibToKey):null;
+    var sisaTo=capTo!==null?(capTo-usedTo):null;
+    var txt=entry?('Tersedia di slot awal: '+entry.ton.toLocaleString('id-ID')+' MT'):'⚠ Shipper ini tidak ada di slot awal yang dipilih';
+    if(sisaTo!==null) txt+=' · Sisa ruang di slot tujuan: '+sisaTo.toLocaleString('id-ID')+' MT';
+    hint.textContent=txt;
+    hint.style.color=entry?'#61788c':'#ef9a9a';
+  } else {
+    hint.innerHTML='&nbsp;';
+  }
+  updateCalibMarker('from',calibFromKey);
+  updateCalibMarker('to',calibToKey);
+}
+
+// ---------- Render panel HAPUS ----------
+function renderDeletePanel(){
+  document.getElementById('calibDelFromLabel').textContent=prettySlotName(calibDelFromKey);
+  document.getElementById('calibDelFromComp').innerHTML=compositionHtml(calibDelFromKey);
+  var hint=document.getElementById('calibDelAvailHint');
+  if(calibDelFromKey){
+    hint.textContent='Total tercatat di slot ini: '+slotTotal(calibDelFromKey).toLocaleString('id-ID')+' MT';
+    hint.style.color='#61788c';
+  } else {
+    hint.innerHTML='&nbsp;';
+  }
+  updateCalibMarker('del',calibDelFromKey);
+}
+
+// ---------- Marker visual 3D untuk slot yang dipilih ----------
+function updateCalibMarker(which,key){
+  var markerName=which==='from'?'calibFromMarker':which==='to'?'calibToMarker':'calibDelMarker';
+  if(window[markerName]){scene.remove(window[markerName]);window[markerName]=null;}
+  if(!key) return;
+  var p=key.split('|');
+  var r=getSubRange(p[0],p[1]);
+  var w=r.x2-r.x1, d=r.z2-r.z1;
+  var col=which==='from'?0xff9800:which==='to'?0xab47bc:0xe53935;
+  var mesh=new THREE.Mesh(new THREE.BoxGeometry(w*0.9,0.22,d*0.9), new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.4,depthWrite:false}));
+  mesh.position.set(r.x1+w/2,0.2,r.z1+d/2);
+  scene.add(mesh);
+  window[markerName]=mesh;
+}
+
+// ---------- Eksekusi PINDAHKAN (validasi ketat: gagal total jika tidak sesuai) ----------
+function doCalibTransfer(){
+  if(!calibFromKey||!calibToKey||!calibShipperCode){
+    calibToast(false,'GAGAL DIPINDAHKAN','Lengkapi dulu slot awal, slot tujuan, dan shipper.');
+    return;
+  }
+  if(calibFromKey===calibToKey){
+    calibToast(false,'GAGAL DIPINDAHKAN','Slot awal dan slot tujuan tidak boleh sama.');
+    return;
+  }
+  var reqTon=parseFloat(document.getElementById('calibTonInput').value);
+  if(!reqTon||reqTon<=0){
+    calibToast(false,'GAGAL DIPINDAHKAN','Masukkan nilai tonase yang valid (lebih dari 0).');
+    return;
+  }
+  var fromList=STOCK[calibFromKey]||[];
+  var idx=-1;
+  for(var i=0;i<fromList.length;i++){ if(fromList[i].code===calibShipperCode){idx=i;break;} }
+  if(idx===-1){
+    calibToast(false,'GAGAL DIPINDAHKAN',calibShipperCode+' tidak ditemukan di '+prettySlotName(calibFromKey)+'.');
+    return;
+  }
+  var entry=fromList[idx];
+  // Validasi 1: tonase yang diminta tidak boleh melebihi yang tersedia di slot awal
+  if(reqTon>entry.ton+0.001){
+    calibToast(false,'GAGAL DIPINDAHKAN','Diminta '+reqTon.toLocaleString('id-ID')+' MT, tapi '+calibShipperCode+' di slot awal hanya '+entry.ton.toLocaleString('id-ID')+' MT.');
+    return;
+  }
+  // Validasi 2: slot tujuan tidak boleh melebihi kapasitas
+  var capTo=CAPACITY[calibToKey]||0;
+  var usedTo=slotTotal(calibToKey);
+  if(usedTo+reqTon>capTo+0.001){
+    calibToast(false,'GAGAL DIPINDAHKAN','Slot tujuan '+prettySlotName(calibToKey)+' penuh. Sisa ruang hanya '+(capTo-usedTo).toLocaleString('id-ID')+' MT dari kapasitas '+capTo.toLocaleString('id-ID')+' MT.');
+    return;
+  }
+
+  // Semua valid → eksekusi persis sejumlah reqTon
+  entry.ton-=reqTon;
+  var entryDate=entry.date;
+  if(entry.ton<=0.0001) fromList.splice(idx,1);
+  if(!STOCK[calibToKey]) STOCK[calibToKey]=[];
+  var toList=STOCK[calibToKey];
+  var toIdx=-1;
+  for(var j=0;j<toList.length;j++){ if(toList[j].code===calibShipperCode){toIdx=j;break;} }
+  if(toIdx!==-1){ toList[toIdx].ton+=reqTon; }
+  else { toList.push({code:calibShipperCode,ton:reqTon,date:entryDate}); }
+
+  refreshTileColor(calibFromKey);
+  refreshTileColor(calibToKey);
+  buildRightPanel();
+  refreshKPI();
+  rebuildShipperOutlines();
+
+  calibToast(true,'BERHASIL DIPINDAHKAN',reqTon.toLocaleString('id-ID')+' MT '+calibShipperCode+' · '+prettySlotName(calibFromKey)+' → '+prettySlotName(calibToKey));
+
+  document.getElementById('calibTonInput').value='';
+  calibFromKey=null; calibToKey=null; calibShipperCode=null;
+  updateCalibMarker('from',null); updateCalibMarker('to',null);
+  renderCalibPanel();
+}
+
+// ---------- Eksekusi HAPUS (proporsional ke semua shipper di slot itu) ----------
+function doCalibDelete(){
+  if(!calibDelFromKey){
+    calibToast(false,'GAGAL DIHAPUS','Pilih dulu slot area awal.');
+    return;
+  }
+  var reqTon=parseFloat(document.getElementById('calibDelTonInput').value);
+  if(!reqTon||reqTon<=0){
+    calibToast(false,'GAGAL DIHAPUS','Masukkan nilai tonase yang valid (lebih dari 0).');
+    return;
+  }
+  var list=STOCK[calibDelFromKey]||[];
+  var total=slotTotal(calibDelFromKey);
+  if(!list.length||total<=0){
+    calibToast(false,'GAGAL DIHAPUS','Slot '+prettySlotName(calibDelFromKey)+' sudah kosong.');
+    return;
+  }
+  if(reqTon>total+0.001){
+    calibToast(false,'GAGAL DIHAPUS','Diminta menghapus '+reqTon.toLocaleString('id-ID')+' MT, tapi total tercatat di slot ini hanya '+total.toLocaleString('id-ID')+' MT.');
+    return;
+  }
+  // Kurangi proporsional sesuai komposisi tiap shipper di slot ini
+  var ratio=reqTon/total;
+  for(var i=list.length-1;i>=0;i--){
+    list[i].ton-=list[i].ton*ratio;
+    if(list[i].ton<=0.0001) list.splice(i,1);
+  }
+
+  refreshTileColor(calibDelFromKey);
+  buildRightPanel();
+  refreshKPI();
+  rebuildShipperOutlines();
+
+  calibToast(true,'BERHASIL DIHAPUS',reqTon.toLocaleString('id-ID')+' MT dari '+prettySlotName(calibDelFromKey));
+
+  document.getElementById('calibDelTonInput').value='';
+  calibDelFromKey=null;
+  updateCalibMarker('del',null);
+  renderDeletePanel();
+}
+
+function buildRightPanel() {
+  var perShipper={}, perCY={'CY1':0,'CY2u':0,'CY2d':0,'CY3':0};
+  Object.keys(STOCK).forEach(function(k){
+    var cy=k.split('|')[0];
+    STOCK[k].forEach(function(s){
+      if(!perShipper[s.code]) perShipper[s.code]={ton:0};
+      perShipper[s.code].ton+=s.ton; perCY[cy]+=s.ton;
+    });
+  });
+  var list=Object.keys(perShipper).sort(function(a,b){return perShipper[b].ton-perShipper[a].ton;});
+  var total=0; list.forEach(function(k){total+=perShipper[k].ton;});
+  var html='';
+  list.forEach(function(k){
+    var meta=SHIPPERS[k]||{name:k,kal:'-',color:'#888'};
+    html+='<div class="shipRow'+(selectedShipper===k?' sel':'')+'" onclick="selectShipper(\''+k+'\')"><div class="sc" style="background:'+meta.color+'"></div><div class="scode">'+k+'<div class="skal">Kal '+meta.kal+'</div></div><div style="font-size:9.5px;color:#aaa;line-height:1.2">'+meta.name+'</div><div class="stonage">'+perShipper[k].ton.toLocaleString('id-ID')+'</div></div>';
+  });
+  document.getElementById('shipList').innerHTML=html;
+  document.getElementById('cyTotals').innerHTML=
+    '<div class="stotal"><span>CY1 - ABC</span><span>'+perCY.CY1.toLocaleString('id-ID')+' MT</span></div>'+
+    '<div class="stotal"><span>CY2 - ABC</span><span>'+perCY.CY2u.toLocaleString('id-ID')+' MT</span></div>'+
+    '<div class="stotal"><span>CY2 - DEF</span><span>'+perCY.CY2d.toLocaleString('id-ID')+' MT</span></div>'+
+    '<div class="stotal"><span>CY3 - ABC</span><span>'+perCY.CY3.toLocaleString('id-ID')+' MT</span></div>'+
+    '<div class="stotal gt"><span>TOTAL COALYARD</span><span>'+total.toLocaleString('id-ID')+' MT</span></div>';
+  var mHtml='';
+  list.forEach(function(k){var meta=SHIPPERS[k]||{name:k,kal:'-'};mHtml+='<tr><td>'+meta.name+'</td><td><b>'+k+'</b></td><td class="t">'+perShipper[k].ton.toLocaleString('id-ID')+'</td><td class="n">'+meta.kal+'</td></tr>';});
+  document.getElementById('calTableActive').innerHTML=mHtml;
+
+  buildSRPanel();
+  buildHexDashboard();
+}
+
+// =========================================================================
+// Pie / donut mini via CSS conic-gradient — dipakai di panel SR & tabel sub-slot
+// =========================================================================
+function pieGradientFromShips(ships){
+  var total=0; ships.forEach(function(s){total+=s.ton;});
+  if(!ships.length || total<=0) return '#2a2a2a';
+  var stops=[], acc=0;
+  ships.forEach(function(s){
+    var meta=SHIPPERS[s.code]||{color:'#888'};
+    var pct=s.ton/total*100;
+    stops.push(meta.color+' '+acc.toFixed(2)+'% '+(acc+pct).toFixed(2)+'%');
+    acc+=pct;
+  });
+  return 'conic-gradient('+stops.join(',')+')';
+}
+
+// =========================================================================
+// HEXAGON HUD — 6 panel data mengelilingi peta coalyard (real data, tanpa mengubah STOCK/CAPACITY)
+// =========================================================================
+var hexDashboardVisible = true;
+(function loadHexPref(){
+  try { var v=localStorage.getItem('hexDashVisible'); if(v==='0') hexDashboardVisible=false; } catch(e){}
+})();
+function toggleHexDashboard(){
+  hexDashboardVisible=!hexDashboardVisible;
+  try{ localStorage.setItem('hexDashVisible', hexDashboardVisible?'1':'0'); }catch(e){}
+  ['hexZona','hexOkupasi','hexSR','hexShipper','hexRingkasan','hexAlert'].forEach(function(id){
+    document.getElementById(id).style.display = hexDashboardVisible ? '' : 'none';
+  });
+}
+function hexColHex(colNum){ return '#'+colNum.toString(16).padStart(6,'0'); }
+function hexComputeZones(){
+  var zones={CY1:{ton:0,cap:0},CY2:{ton:0,cap:0},CY3:{ton:0,cap:0}};
+  Object.keys(CAPACITY).forEach(function(k){
+    var cyRaw=k.split('|')[0];
+    var zk = cyRaw==='CY1' ? 'CY1' : (cyRaw==='CY3' ? 'CY3' : 'CY2');
+    zones[zk].cap+=CAPACITY[k];
+    (STOCK[k]||[]).forEach(function(s){ zones[zk].ton+=s.ton; });
+  });
+  return zones;
+}
+function hexComputeShipperRanking(){
+  var perShipper={};
+  Object.keys(STOCK).forEach(function(k){
+    (STOCK[k]||[]).forEach(function(s){
+      if(!perShipper[s.code]) perShipper[s.code]={code:s.code,ton:0};
+      perShipper[s.code].ton+=s.ton;
+    });
+  });
+  return Object.keys(perShipper).map(function(k){return perShipper[k];}).sort(function(a,b){return b.ton-a.ton;});
+}
+function buildHexDashboard(){
+  var zones=hexComputeZones();
+  var totalTon=zones.CY1.ton+zones.CY2.ton+zones.CY3.ton;
+  var totalCap=zones.CY1.cap+zones.CY2.cap+zones.CY3.cap;
+  var shippers=hexComputeShipperRanking();
+
+  // --- 1. Stock per Zona ---
+  var zh='';
+  [['CY1',zones.CY1],['CY2',zones.CY2],['CY3',zones.CY3]].forEach(function(pair){
+    var name=pair[0], z=pair[1];
+    var pct=z.cap>0?(z.ton/z.cap*100):0;
+    var col=hexColHex(tileColorFor(pct));
+    zh+='<div class="hexBarRow"><div class="lbl"><span>'+name+'</span><span>'+z.ton.toLocaleString('id-ID')+' / '+z.cap.toLocaleString('id-ID')+' MT</span></div>'+
+        '<div class="hexBarTrack"><i style="width:'+Math.min(100,pct).toFixed(1)+'%;background:'+col+';"></i></div></div>';
+  });
+  document.getElementById('hexZonaBody').innerHTML=zh;
+
+  // --- 2. Okupansi Total Yard (gauge) ---
+  var pctAll = totalCap>0 ? (totalTon/totalCap*100) : 0;
+  var colAll = hexColHex(tileColorFor(pctAll));
+  document.getElementById('hexOkupasiBody').innerHTML=
+    '<div class="hexGaugeWrap">'+
+      '<div class="hexGaugeRing" style="background:conic-gradient('+colAll+' '+Math.min(100,pctAll).toFixed(1)+'%, rgba(255,255,255,.08) '+Math.min(100,pctAll).toFixed(1)+'% 100%);">'+
+        '<div class="hexGaugeHole"><b>'+pctAll.toFixed(1)+'%</b><span>TERISI</span></div>'+
+      '</div>'+
+      '<div class="hexGaugeSub">'+totalTon.toLocaleString('id-ID')+' / '+totalCap.toLocaleString('id-ID')+' MT</div>'+
+    '</div>';
+
+  // --- 3. Keseimbangan SR1 / SR2 ---
+  var z1=srZoneStock(1), z2=srZoneStock(2);
+  var sh='';
+  [[1,z1],[2,z2]].forEach(function(pair){
+    var n=pair[0], z=pair[1];
+    var st=SR_STATUS[n]; var down=st.status==='breakdown';
+    sh+='<div class="hexSRRow">'+
+      '<div class="hexSRDonut" style="background:'+pieGradientFromShips(z.ships)+'"></div>'+
+      '<div class="hexSRInfo"><b>SR'+n+'</b> · '+(down?'<span style="color:#ef9a9a;">🔴 Breakdown</span>':'<span style="color:#81c784;">🟢 Normal</span>')+'<br>'+z.total.toLocaleString('id-ID')+' MT</div>'+
+    '</div>';
+  });
+  document.getElementById('hexSRBody').innerHTML=sh;
+
+  // --- 4. Top Shipper Terbesar ---
+  var top=shippers.slice(0,6);
+  var maxTon=top.length?top[0].ton:1;
+  var rh='';
+  if(!top.length){ rh='<div style="color:#666;font-style:italic;font-size:9.5px;">(belum ada data stock)</div>'; }
+  top.forEach(function(s){
+    var meta=SHIPPERS[s.code]||{color:'#888'};
+    var w=(s.ton/maxTon*100).toFixed(1);
+    rh+='<div class="hexRankRow"><div class="dot" style="background:'+meta.color+'"></div><div class="code">'+s.code+'</div>'+
+        '<div class="hexRankBarTrack"><i style="width:'+w+'%;background:'+meta.color+';"></i></div>'+
+        '<div class="tn">'+s.ton.toLocaleString('id-ID')+'</div></div>';
+  });
+  document.getElementById('hexShipperBody').innerHTML=rh;
+
+  // --- 5. Ringkasan Operasional ---
+  var subKeys=Object.keys(CAPACITY);
+  var filled=0; subKeys.forEach(function(k){ if((STOCK[k]||[]).length) filled++; });
+  document.getElementById('hexRingkasanBody').innerHTML=
+    '<div class="hexStatRow"><span>Total Stock</span><span style="color:#64b5f6;">'+totalTon.toLocaleString('id-ID')+' MT</span></div>'+
+    '<div class="hexStatRow"><span>Total Kapasitas</span><span style="color:#aaa;">'+totalCap.toLocaleString('id-ID')+' MT</span></div>'+
+    '<div class="hexStatRow"><span>Okupansi Yard</span><span style="color:'+colAll+';">'+pctAll.toFixed(1)+'%</span></div>'+
+    '<div class="hexStatRow"><span>Sub-slot Terisi</span><span>'+filled+' / '+subKeys.length+'</span></div>'+
+    '<div class="hexStatRow" style="border-bottom:none;"><span>Shipper Aktif</span><span>'+shippers.length+'</span></div>';
+
+  // --- 6. Status & Peringatan ---
+  var nearFull=0, empty=0;
+  subKeys.forEach(function(k){
+    var cap=CAPACITY[k]||1; var ton=0; (STOCK[k]||[]).forEach(function(s){ton+=s.ton;});
+    var pct=ton/cap*100;
+    if(pct>=90) nearFull++;
+    if(ton<=0.001) empty++;
+  });
+  var ah='';
+  [1,2].forEach(function(n){
+    var st=SR_STATUS[n]; var down=st.status==='breakdown';
+    ah+='<div class="hexAlertRow">'+(down?'🔴':'🟢')+' <span>SR'+n+' · '+(down?('Breakdown'+(st.note?' — '+st.note:'')):'Normal beroperasi')+'</span></div>';
+  });
+  ah+='<div class="hexAlertRow">'+(nearFull>0?'🟠':'🟢')+' <span>'+nearFull+' sub-slot mendekati penuh (≥90%)</span></div>';
+  ah+='<div class="hexAlertRow">⚫ <span>'+empty+' sub-slot masih kosong</span></div>';
+  document.getElementById('hexAlertBody').innerHTML=ah;
+
+  ['hexZona','hexOkupasi','hexSR','hexShipper','hexRingkasan','hexAlert'].forEach(function(id){
+    document.getElementById(id).style.display = hexDashboardVisible ? '' : 'none';
+  });
+}
+
+// =========================================================================
+// Donut komposisi area yang sedang di-hover kursor, tampil di bawah judul kiri atas
+// =========================================================================
+function updateHoverDonut(titleTxt, ships, pct){
+  var donut=document.getElementById('hoverDonut');
+  var titleEl=document.getElementById('hoverDonutTitle');
+  var legendEl=document.getElementById('hoverDonutLegend');
+  var pctEl=document.getElementById('hoverDonutPct');
+  titleEl.style.color='#fff';
+  titleEl.textContent=titleTxt;
+  pctEl.textContent=(pct===null||pct===undefined) ? '—' : parseFloat(pct).toFixed(1)+'%';
+  if(!ships || !ships.length){
+    donut.style.background='#2a2a2a';
+    legendEl.innerHTML='<div style="color:#666;font-style:italic;">(tidak ada data komposisi)</div>';
+    return;
+  }
+  donut.style.background=pieGradientFromShips(ships);
+  var merged={};
+  ships.forEach(function(s){ if(!merged[s.code]) merged[s.code]={code:s.code,ton:0}; merged[s.code].ton+=s.ton; });
+  var arr=Object.keys(merged).map(function(k){return merged[k];}).sort(function(a,b){return b.ton-a.ton;});
+  var html='';
+  arr.forEach(function(s){
+    var meta=SHIPPERS[s.code]||{color:'#888'};
+    html+='<div class="row"><span style="color:'+meta.color+'">● '+s.code+'</span><span>'+s.ton.toLocaleString('id-ID')+' MT</span></div>';
+  });
+  legendEl.innerHTML=html;
+}
+function resetHoverDonut(){
+  document.getElementById('hoverDonut').style.background='#2a2a2a';
+  document.getElementById('hoverDonutPct').textContent='—';
+  document.getElementById('hoverDonutTitle').style.color='#888';
+  document.getElementById('hoverDonutTitle').textContent='Arahkan kursor ke area coalyard...';
+  document.getElementById('hoverDonutLegend').innerHTML='';
+}
+
+// =========================================================================
+// Panel Stacker Reclaimer — keseimbangan stock, komposisi & status breakdown
+// =========================================================================
+function srZoneStock(srNum){
+  var ships=[], total=0, perShipper={};
+  Object.keys(STOCK).forEach(function(k){
+    var cy=k.split('|')[0];
+    if(SR_ZONES[srNum].indexOf(cy)===-1) return;
+    STOCK[k].forEach(function(s){
+      total+=s.ton;
+      if(!perShipper[s.code]) perShipper[s.code]={code:s.code,ton:0};
+      perShipper[s.code].ton+=s.ton;
+    });
+  });
+  Object.keys(perShipper).forEach(function(c){ships.push(perShipper[c]);});
+  ships.sort(function(a,b){return b.ton-a.ton;});
+  return {ships:ships, total:total};
+}
+function buildSRPanel(){
+  var z1=srZoneStock(1), z2=srZoneStock(2);
+  var grand=z1.total+z2.total;
+  var p1=grand>0?(z1.total/grand*100):50, p2=100-p1;
+  document.getElementById('srBalanceBar').innerHTML=
+    '<div class="b1" style="width:'+p1.toFixed(1)+'%"></div><div class="b2" style="width:'+p2.toFixed(1)+'%"></div>';
+  document.getElementById('srBalanceLbl').innerHTML=
+    '<span>SR1 · '+p1.toFixed(0)+'%</span><span>SR2 · '+p2.toFixed(0)+'%</span>';
+
+  var html='';
+  [1,2].forEach(function(n){
+    var z=(n===1)?z1:z2;
+    var st=SR_STATUS[n];
+    var down=st.status==='breakdown';
+    var compHtml='';
+    if(!z.ships.length){
+      compHtml='<div style="color:#666;font-style:italic;">(zona kosong)</div>';
+    } else {
+      z.ships.forEach(function(s){
+        var meta=SHIPPERS[s.code]||{color:'#888'};
+        compHtml+='<div class="row"><span style="color:'+meta.color+'">● '+s.code+'</span><span>'+s.ton.toLocaleString('id-ID')+'</span></div>';
+      });
+    }
+    html+='<div class="srCard'+(down?' breakdown':'')+'">'+
+      '<div class="srCardHead"><span class="srCardTitle">STACKER RECLAIMER '+n+'</span>'+
+      '<span class="srBadge '+(down?'down':'ok')+'">'+(down?'🔴 BREAKDOWN':'🟢 NORMAL')+'</span></div>'+
+      '<div class="srCardBody">'+
+        '<div class="srPie" style="width:38px;height:38px;background:'+pieGradientFromShips(z.ships)+'"></div>'+
+        '<div class="srComp">'+compHtml+'<div class="srTotal">'+z.total.toLocaleString('id-ID')+' MT</div></div>'+
+      '</div>'+
+      (down && st.note ? '<div class="srNote">⚠ '+st.note+'</div>' : '')+
+      '<div style="text-align:right;margin-top:5px;"><button class="srEditBtn" onclick="openSRStatusModal('+n+')">✏️ Edit Status</button></div>'+
+    '</div>';
+  });
+  document.getElementById('srCards').innerHTML=html;
+  refreshSRVisuals();
+}
+
+// =========================================================================
+// Modal edit status Stacker Reclaimer
+// =========================================================================
+var srEditingIndex=null;
+function openSRStatusModal(n){
+  srEditingIndex=n;
+  document.getElementById('srEditTitle').textContent='✏️ Edit Status — STACKER RECLAIMER '+n;
+  var st=SR_STATUS[n];
+  document.getElementById('srStatusRadioNormal').checked = st.status!=='breakdown';
+  document.getElementById('srStatusRadioDown').checked = st.status==='breakdown';
+  document.getElementById('srEditNote').value = st.note||'';
+  document.getElementById('srEditModal').style.display='flex';
+}
+function closeSRStatusModal(){
+  document.getElementById('srEditModal').style.display='none';
+  srEditingIndex=null;
+}
+function saveSRStatus(){
+  if(!srEditingIndex) return;
+  var down=document.getElementById('srStatusRadioDown').checked;
+  SR_STATUS[srEditingIndex]={status: down?'breakdown':'normal', note: document.getElementById('srEditNote').value.trim()};
+  saveSRStatusToStorage();
+  closeSRStatusModal();
+  buildSRPanel();
+  buildHexDashboard();
+}
+
+// =========================================================================
+// KPI bar (gaya v8) — dihitung dari STOCK
+// =========================================================================
+var TOTAL_CAP=223778, BURN_RATE=8437;
+function refreshKPI(){
+  var total=0, num=0;
+  Object.keys(STOCK).forEach(function(k){
+    STOCK[k].forEach(function(s){
+      total+=s.ton;
+      num+=(SHIPPERS[s.code]?SHIPPERS[s.code].kal:4000)*s.ton;
+    });
+  });
+  document.getElementById('kTotal').textContent=total.toLocaleString('id-ID')+' MT';
+  document.getElementById('kKal').textContent=Math.round(total>0?num/total:0).toLocaleString('id-ID');
+  document.getElementById('kFill').textContent=(total/TOTAL_CAP*100).toFixed(1)+'%';
+  document.getElementById('kDays').textContent=(total/BURN_RATE).toFixed(1)+' hari';
+}
+
+// =========================================================================
+// Pilih shipper → garis keliling area yang memuat batubaranya menyala hijau
+// =========================================================================
+var selectedShipper=null;
+var outlineGroup=null, outlineMats=[];
+function selectShipper(code){
+  if(calibMode==='pickShipper'){
+    calibShipperCode=code;
+    reopenCalibAfterPick();
+    return;
+  }
+  selectedShipper=(selectedShipper===code)?null:code;
+  buildRightPanel();
+  rebuildShipperOutlines();
+}
+function rebuildShipperOutlines(){
+  if(outlineGroup){scene.remove(outlineGroup);outlineGroup=null;}
+  outlineMats=[];
+  if(!selectedShipper) return;
+  outlineGroup=new THREE.Group();
+  Object.keys(STOCK).forEach(function(key){
+    var has=STOCK[key].some(function(s){return s.code===selectedShipper&&s.ton>0;});
+    if(!has) return;
+    var parts=key.split('|');
+    var r=getSubRange(parts[0],parts[1]);
+    var w=r.x2-r.x1, d=r.z2-r.z1;
+    var cx=r.x1+w/2, cz=r.z1+d/2;
+    var t=0.5, h=0.18, y=0.16;                 // frame tipis: hanya GARIS KELILING, bukan isi blok
+    var mat=new THREE.MeshBasicMaterial({color:0x00ff88,transparent:true,opacity:0.9,depthWrite:false});
+    outlineMats.push(mat);
+    // 4 sisi frame
+    var top=new THREE.Mesh(new THREE.BoxGeometry(w,h,t),mat);    top.position.set(cx,y,r.z1+t/2);
+    var bot=new THREE.Mesh(new THREE.BoxGeometry(w,h,t),mat);    bot.position.set(cx,y,r.z2-t/2);
+    var lef=new THREE.Mesh(new THREE.BoxGeometry(t,h,d),mat);    lef.position.set(r.x1+t/2,y,cz);
+    var rig=new THREE.Mesh(new THREE.BoxGeometry(t,h,d),mat);    rig.position.set(r.x2-t/2,y,cz);
+    outlineGroup.add(top,bot,lef,rig);
+  });
+  scene.add(outlineGroup);
+}
+
+// =========================================================================
+// Grafik Total Stock -- SELURUH tanggal (8 Juni - 26 Juli 2026), data aktual tervalidasi
+// =========================================================================
+var HIST=[
+  {d:'08 Jun',v:4452,est:0},{d:'09 Jun',v:3222,est:0},{d:'10 Jun',v:6992,est:0},
+  {d:'11 Jun',v:17725,est:0},{d:'12 Jun',v:26170,est:0},{d:'13 Jun',v:26228,est:0},
+  {d:'14 Jun',v:24189,est:0},{d:'15 Jun',v:24189,est:0},{d:'16 Jun',v:24925,est:0},
+  {d:'17 Jun',v:23475,est:0},{d:'18 Jun',v:27441,est:0},{d:'19 Jun',v:23352,est:0},
+  {d:'20 Jun',v:22544,est:0},{d:'21 Jun',v:28428,est:0},{d:'22 Jun',v:29687,est:0},
+  {d:'23 Jun',v:36149,est:0},{d:'24 Jun',v:42440,est:0},{d:'25 Jun',v:47605,est:0},
+  {d:'26 Jun',v:48724,est:0},{d:'27 Jun',v:44173,est:0},{d:'28 Jun',v:42336,est:0},
+  {d:'29 Jun',v:42028,est:0},{d:'30 Jun',v:44467,est:0},{d:'01 Jul',v:42164,est:0},
+  {d:'02 Jul',v:43983,est:0},{d:'03 Jul',v:43351,est:0},{d:'04 Jul',v:40083,est:0},
+  {d:'05 Jul',v:45116,est:0},{d:'06 Jul',v:51477,est:0},{d:'07 Jul',v:52260,est:0},
+  {d:'08 Jul',v:51353,est:0},{d:'09 Jul',v:58429,est:0},{d:'10 Jul',v:61429,est:0},
+  {d:'11 Jul',v:61949,est:0},{d:'12 Jul',v:61185,est:0},{d:'13 Jul',v:57147,est:0},
+  {d:'14 Jul',v:57015,est:0},{d:'15 Jul',v:58676,est:0},{d:'16 Jul',v:54617,est:0},
+  {d:'17 Jul',v:48245,est:0},{d:'18 Jul',v:50288,est:0},{d:'19 Jul',v:49731,est:0},
+  {d:'20 Jul',v:47276,est:0},{d:'21 Jul',v:47018,est:0},{d:'22 Jul',v:46200,est:0},
+  {d:'23 Jul',v:48629,est:0},{d:'24 Jul',v:50030,est:0},{d:'25 Jul',v:61601,est:0},
+  {d:'26 Jul',v:59509,est:0}
+];
+// Proyeksi stock dari antrian tongkang (garis putus-putus abu-abu, lanjutan HIST).
+// Diisi otomatis via fetchProjectionData() -- kosong kalau fitur blm di-setup.
+var PROJECTION = [];
+function refreshProjectionData(){
+  fetchProjectionData().then(function(data){
+    PROJECTION = data;
+    if(document.getElementById('chartModal').style.display==='flex') drawStockChart(-1);
+  });
+}
+function toggleChartModal(show){
+  document.getElementById('chartModal').style.display=show?'flex':'none';
+  if(show){ drawStockChart(-1); refreshProjectionData(); }
+}
+function totalChartPoints(){ return HIST.length + PROJECTION.length; }
+function chartPointAt(i){
+  if(i < HIST.length) return {d:HIST[i].d, v:HIST[i].v, isProjection:false};
+  var p = PROJECTION[i-HIST.length];
+  return {d:p.d, v:p.v, isProjection:true};
+}
+function drawStockChart(hoverIdx){
+  var cv=document.getElementById('stockChart');
+  var ctx=cv.getContext('2d');
+  var W=cv.width,H=cv.height;
+  var padL=64,padR=16,padT=18,padB=42;
+  var pw=W-padL-padR,ph=H-padT-padB;
+  var nTotal=totalChartPoints();
+  var allVals=HIST.map(function(h){return h.v;}).concat(PROJECTION.map(function(p){return p.v;}));
+  var vmin=0;
+  var vmax=Math.max(65000, Math.ceil((Math.max.apply(null,allVals)*1.08)/10000)*10000);
+  function X(i){return padL+pw*i/(nTotal-1);}
+  function Y(v){return padT+ph*(1-(v-vmin)/(vmax-vmin));}
+  ctx.clearRect(0,0,W,H);
+  // grid horizontal
+  ctx.font='10px Arial'; ctx.textAlign='right'; ctx.textBaseline='middle';
+  for(var g=vmin;g<=vmax;g+=10000){
+    ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.beginPath();
+    ctx.moveTo(padL,Y(g)); ctx.lineTo(W-padR,Y(g)); ctx.stroke();
+    ctx.fillStyle='#61788c'; ctx.fillText((g/1000)+'k',padL-8,Y(g));
+  }
+  // area fill (data aktual saja)
+  var grad=ctx.createLinearGradient(0,padT,0,H-padB);
+  grad.addColorStop(0,'rgba(79,195,247,0.22)'); grad.addColorStop(1,'rgba(79,195,247,0.02)');
+  ctx.beginPath(); ctx.moveTo(X(0),Y(HIST[0].v));
+  for(var i=1;i<HIST.length;i++) ctx.lineTo(X(i),Y(HIST[i].v));
+  ctx.lineTo(X(HIST.length-1),H-padB); ctx.lineTo(X(0),H-padB); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+  // garis stock aktual (solid biru)
+  ctx.lineWidth=2;
+  ctx.strokeStyle='#4fc3f7';
+  ctx.beginPath(); ctx.moveTo(X(0),Y(HIST[0].v));
+  for(var i2=1;i2<HIST.length;i2++) ctx.lineTo(X(i2),Y(HIST[i2].v));
+  ctx.stroke();
+  // garis proyeksi (putus-putus abu-abu), lanjutan PERSIS dari titik aktual terakhir --
+  // sampai antrian tongkang habis. Begitu hari berganti & data aktual masuk, titik ini
+  // otomatis tertimpa garis biru (HIST bertambah panjang, PROJECTION dihitung ulang dari
+  // sisa antrian yg belum selesai).
+  if(PROJECTION.length>0){
+    ctx.setLineDash([5,4]);
+    ctx.strokeStyle='#9aa7b2';
+    ctx.beginPath();
+    ctx.moveTo(X(HIST.length-1),Y(HIST[HIST.length-1].v));
+    for(var pi=0;pi<PROJECTION.length;pi++) ctx.lineTo(X(HIST.length+pi),Y(PROJECTION[pi].v));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    for(var pi2=0;pi2<PROJECTION.length;pi2++){
+      ctx.beginPath(); ctx.arc(X(HIST.length+pi2),Y(PROJECTION[pi2].v),2.6,0,Math.PI*2);
+      ctx.fillStyle='#9aa7b2'; ctx.fill();
+    }
+  }
+  // titik data aktual
+  for(var i4=0;i4<HIST.length;i4++){
+    ctx.beginPath(); ctx.arc(X(i4),Y(HIST[i4].v),3.4,0,Math.PI*2);
+    ctx.fillStyle='#4fc3f7'; ctx.fill();
+  }
+  // label X tiap 5 hari + hari terakhir (aktual & proyeksi)
+  ctx.fillStyle='#61788c'; ctx.textAlign='center'; ctx.textBaseline='top';
+  for(var i5=0;i5<nTotal;i5+=5) ctx.fillText(chartPointAt(i5).d,X(i5),H-padB+8);
+  ctx.fillText(chartPointAt(nTotal-1).d,X(nTotal-1),H-padB+8);
+  // hover crosshair + tooltip (aktual maupun proyeksi)
+  if(hoverIdx>=0&&hoverIdx<nTotal){
+    var hx=X(hoverIdx),hv=chartPointAt(hoverIdx);
+    ctx.strokeStyle=hv.isProjection?'rgba(154,167,178,0.6)':'rgba(255,213,79,0.5)'; ctx.beginPath();
+    ctx.moveTo(hx,padT); ctx.lineTo(hx,H-padB); ctx.stroke();
+    ctx.beginPath(); ctx.arc(hx,Y(hv.v),5,0,Math.PI*2);
+    ctx.fillStyle=hv.isProjection?'#c3ccd4':'#ffd54f'; ctx.fill();
+    var label=hv.d+' 2026 · '+hv.v.toLocaleString('id-ID')+' MT'+(hv.isProjection?' (proyeksi dari antrian tongkang)':' (aktual)');
+    ctx.font='bold 11px Arial';
+    var tw=ctx.measureText(label).width+16;
+    var tx=Math.min(Math.max(hx-tw/2,padL),W-padR-tw);
+    var ty=Math.max(padT,Y(hv.v)-34);
+    ctx.fillStyle='rgba(10,18,26,0.95)';
+    ctx.strokeStyle='rgba(79,195,247,0.5)';
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(tx,ty,tw,22,6); else ctx.rect(tx,ty,tw,22);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#eaf2f8'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillText(label,tx+8,ty+11);
+  }
+}
+(function(){
+  var cv=document.getElementById('stockChart');
+  cv.addEventListener('mousemove',function(e){
+    var r=cv.getBoundingClientRect();
+    var x=(e.clientX-r.left)*(cv.width/r.width);
+    var padL=64,padR=16,pw=cv.width-padL-padR;
+    var nTotal=totalChartPoints();
+    var idx=Math.round((x-padL)/pw*(nTotal-1));
+    if(idx<0)idx=0; if(idx>nTotal-1)idx=nTotal-1;
+    drawStockChart(idx);
+  });
+  cv.addEventListener('mouseleave',function(){drawStockChart(-1);});
+})();
+
+var keys={};
+window.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&calibMode){ reopenCalibAfterPick(); return; }
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable) return;
+  keys[e.key]=true;
+  // Cegah perilaku default browser (scroll halaman) agar W A S D / Q E / Arrow selalu menggerakkan kamera
+  if(['w','W','a','A','s','S','d','D','q','Q','e','E','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].indexOf(e.key)!==-1){
+    e.preventDefault();
+  }
+});
+window.addEventListener('keyup',function(e){delete keys[e.key];});
+function handleKeys(){
+  if(document.activeElement&&document.activeElement.tagName==='INPUT') return;
+  var s=0.8;
+  if(keys['w']||keys['W']||keys['ArrowUp'])    {controls.target.add(new THREE.Vector3(-s,0,0));camera.position.add(new THREE.Vector3(-s,0,0));}
+  if(keys['s']||keys['S']||keys['ArrowDown'])  {controls.target.add(new THREE.Vector3(s,0,0));camera.position.add(new THREE.Vector3(s,0,0));}
+  if(keys['a']||keys['A']||keys['ArrowLeft'])  {controls.target.add(new THREE.Vector3(0,0,s));camera.position.add(new THREE.Vector3(0,0,s));}
+  if(keys['d']||keys['D']||keys['ArrowRight']) {controls.target.add(new THREE.Vector3(0,0,-s));camera.position.add(new THREE.Vector3(0,0,-s));}
+  if(keys['q']||keys['Q']){var r=-1.5*Math.PI/180,off=camera.position.clone().sub(controls.target),len=Math.sqrt(off.x*off.x+off.z*off.z),th=Math.atan2(off.z,off.x)+r;camera.position.x=controls.target.x+len*Math.cos(th);camera.position.z=controls.target.z+len*Math.sin(th);}
+  if(keys['e']||keys['E']){var r2=1.5*Math.PI/180,off2=camera.position.clone().sub(controls.target),len2=Math.sqrt(off2.x*off2.x+off2.z*off2.z),th2=Math.atan2(off2.z,off2.x)+r2;camera.position.x=controls.target.x+len2*Math.cos(th2);camera.position.z=controls.target.z+len2*Math.sin(th2);}
+}
+
+window.addEventListener('resize',function(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
+
+function animate(){
+  requestAnimationFrame(animate);
+  srList.forEach(function(sr){
+    if(sr.wheel) sr.wheel.rotation.x+=0.01*(sr.dirSign===1?-1:1);
+    if(sr.beacon && sr.beacon.visible){
+      var bp=0.6+0.4*Math.sin(performance.now()*0.008);
+      sr.beaconMat.emissiveIntensity=1.0+bp;
+      sr.beacon.scale.setScalar(0.85+0.3*bp);
+    }
+  });
+  // efek nyala berdenyut pada garis keliling hijau shipper terpilih
+  if(outlineMats.length){
+    var pulse=0.55+0.45*Math.sin(performance.now()*0.005);
+    outlineMats.forEach(function(m){m.opacity=pulse;});
+  }
+  handleKeys(); controls.update(); renderer.render(scene,camera);
+}
+
+// =========================================================================
+// 🌐 GOOGLE SHEET SYNC + SHIFT / JAM AKTIF
+// =========================================================================
+var SHEET_ID='17HFjUVMLDXVtrl546OU7SxSQ5a6j32ha2-7B58FvH1k';
+var LIVE_SHEET_NAME='Stock per Slot (Live)';
+var PROJECTION_SHEET_NAME='Proyeksi Stock (Live)';
+var GVIZ_BASE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq';
+var pendingStock=null;
+
+// ---------- Shift math ----------
+function currentShiftInfo(now){
+  now=now||new Date();
+  var mins=now.getHours()*60+now.getMinutes();
+  var MALAM=23*60, PAGI=7*60+30, SORE=15*60+30;
+  var totalMalam=(24*60-MALAM)+PAGI, totalPagi=SORE-PAGI, totalSore=MALAM-SORE;
+  if(mins>=MALAM||mins<PAGI){
+    var startDate=new Date(now); if(mins<PAGI) startDate.setDate(startDate.getDate()-1);
+    startDate.setHours(23,0,0,0);
+    var elapsed=(mins>=MALAM)?(mins-MALAM):(24*60-MALAM+mins);
+    return {name:'malam',label:'Shift Malam',window:'23:00 - 07:30',remainingMins:totalMalam-elapsed,shiftStartDate:startDate};
+  }
+  if(mins<SORE){
+    var sd=new Date(now); sd.setHours(7,30,0,0);
+    return {name:'pagi',label:'Shift Pagi',window:'07:30 - 15:30',remainingMins:SORE-mins,shiftStartDate:sd};
+  }
+  var sd2=new Date(now); sd2.setHours(15,30,0,0);
+  return {name:'sore',label:'Shift Sore',window:'15:30 - 23:00',remainingMins:MALAM-mins,shiftStartDate:sd2};
+}
+function pad2(n){return String(n).padStart(2,'0');}
+function shiftLockKey(info){
+  var d=info.shiftStartDate;
+  return 'coalyard_pull_'+d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'_'+info.name;
+}
+function isShiftLocked(info){return !!localStorage.getItem(shiftLockKey(info));}
+function shiftLockTime(info){var t=localStorage.getItem(shiftLockKey(info));return t?new Date(t):null;}
+function setShiftLock(info){localStorage.setItem(shiftLockKey(info),new Date().toISOString());}
+function clearShiftLock(info){localStorage.removeItem(shiftLockKey(info));}
+function getPreviousShift(info){
+  // Ambil waktu 1 menit sebelum shift ini mulai
+  var t=new Date(info.shiftStartDate); t.setMinutes(t.getMinutes()-1);
+  return currentShiftInfo(t);
+}
+
+// ---------- Update clock (top pill) ----------
+function updateClockPill(){
+  var now=new Date();
+  var timeStr=pad2(now.getHours())+':'+pad2(now.getMinutes())+':'+pad2(now.getSeconds());
+  var info=currentShiftInfo(now);
+  var rH=Math.floor(info.remainingMins/60), rM=info.remainingMins%60;
+  var tEl=document.getElementById('clkTime'), iEl=document.getElementById('clkInfo');
+  if(tEl) tEl.textContent=timeStr;
+  if(iEl) iEl.innerHTML='<b>'+info.label+'</b> aktif <span style="opacity:.75">('+info.window+') · sisa <span class="remain">'+rH+'j '+rM+'m</span></span>';
+  // sync modal juga
+  var sT=document.getElementById('syncClockTime'), sS=document.getElementById('syncClockShift');
+  if(sT&&document.getElementById('syncModal').style.display==='flex'){
+    sT.textContent=timeStr;
+    sS.innerHTML='<b style="color:#81c784;">'+info.label+'</b> aktif · '+info.window+' · sisa '+rH+'j '+rM+'m';
+  }
+}
+
+// ---------- Sync modal orchestration ----------
+function openSyncModal(){
+  document.getElementById('syncModal').style.display='flex';
+  pendingStock=null;
+  document.getElementById('syncPreview').style.display='none';
+  document.getElementById('syncApplyRow').style.display='none';
+  document.getElementById('btnFetch').style.display='block';
+  renderSyncPanel();
+  updateClockPill();
+}
+function closeSyncModal(){
+  document.getElementById('syncModal').style.display='none';
+  pendingStock=null;
+}
+function renderSyncPanel(){
+  var info=currentShiftInfo();
+  var locked=isShiftLocked(info);
+  document.getElementById('syncCondActive').innerHTML='<span style="color:#69f0ae;">✅ Shift aktif: '+info.label+' ('+info.window+')</span>';
+  if(locked){
+    var t=shiftLockTime(info);
+    document.getElementById('syncCondLock').innerHTML='<span style="color:#ef9a9a;">🔒 Sudah ditarik shift ini pada '+pad2(t.getHours())+':'+pad2(t.getMinutes())+':'+pad2(t.getSeconds())+'</span>';
+  } else {
+    document.getElementById('syncCondLock').innerHTML='<span style="color:#69f0ae;">✅ Belum ditarik shift ini · siap tarik data</span>';
+  }
+  var btn=document.getElementById('btnFetch');
+  btn.disabled=locked;
+  btn.textContent=locked?'🔒 Terkunci — sudah ditarik shift ini':'🌐 Tarik Data Sekarang';
+  btn.style.opacity=locked?'.55':'1';
+  btn.style.cursor=locked?'not-allowed':'pointer';
+
+  // Log 3 shift terakhir
+  var shifts=[info, getPreviousShift(info), getPreviousShift(getPreviousShift(info))];
+  var html='';
+  shifts.forEach(function(sh,idx){
+    var d=sh.shiftStartDate;
+    var dateLabel=pad2(d.getDate())+'/'+pad2(d.getMonth()+1);
+    var t=shiftLockTime(sh);
+    var status=t
+      ? '<span style="color:#69f0ae;">✅ '+pad2(t.getHours())+':'+pad2(t.getMinutes())+'</span>'
+      : '<span style="color:#61788c;">— belum ditarik</span>';
+    html+='<div class="syncLogRow'+(idx===0?' active':'')+'"><span class="lLabel">'+sh.label+' '+dateLabel+'</span>'+status+'</div>';
+  });
+  document.getElementById('syncLog').innerHTML=html;
+}
+
+// ---------- Fetch dari gviz ----------
+// JSONP: memuat data lewat <script src="..."> alih-alih fetch(). Teknik ini TIDAK kena
+// batasan CORS / file:// origin sama sekali (berbeda dari fetch/XHR) -- makanya file HTML
+// ini bisa dibuka langsung (double-click) di komputer mana pun, tanpa perlu server/hosting.
+var JSONP_TIMEOUT_MS = 12000;
+function fetchSheet(){
+  return new Promise(function(resolve, reject){
+    var cbName = '__gvizCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
+    var script = document.createElement('script');
+    var timeoutId;
+
+    function cleanup(){
+      clearTimeout(timeoutId);
+      try { delete window[cbName]; } catch(e){ window[cbName]=undefined; }
+      if(script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = function(resp){
+      cleanup();
+      if(!resp){ reject(new Error('Response kosong dari Google Sheets.')); return; }
+      if(resp.status==='error'){
+        var msg=(resp.errors&&resp.errors[0]&&resp.errors[0].detailed_message)||'unknown';
+        reject(new Error('Tab "'+LIVE_SHEET_NAME+'" tidak ditemukan atau bermasalah.\n\nGoogle Sheets: '+msg+'\n\nKemungkinan: menu "⚙️ Setup Live Sync (jalankan sekali)" belum pernah dijalankan di Apps Script, sehingga tab ini belum otomatis terbuat. Buka spreadsheet → menu "🏭 Coalyard Live Sync" → jalankan Setup.'));
+        return;
+      }
+      if(!resp.table){ reject(new Error('Response tidak berisi tabel data.')); return; }
+      if(!resp.table.rows||!resp.table.rows.length){
+        reject(new Error('Tab "'+LIVE_SHEET_NAME+'" masih kosong (belum ada hasil recompute). Coba klik "🔄 Recompute Sekarang" di menu Apps Script, tunggu sebentar, lalu tarik data lagi.'));
+        return;
+      }
+      resolve(resp.table);
+    };
+
+    script.onerror = function(){
+      cleanup();
+      reject(new Error('Gagal memuat dari Google Sheets (script gagal dimuat).\n\nKemungkinan:\n1. Tidak ada koneksi internet saat ini\n2. Domain docs.google.com diblokir jaringan tempat kamu berada\n3. Sheet ID salah / spreadsheet sudah dihapus/dipindah'));
+    };
+
+    timeoutId = setTimeout(function(){
+      cleanup();
+      reject(new Error('Waktu tunggu habis (12 detik), tidak ada balasan dari Google Sheets.\n\nKemungkinan:\n1. Sheet BELUM di-share "Anyone with the link — Viewer" (paling sering)\n2. Koneksi internet lambat/terputus\n\nSolusi #1: buka sheet → Share → ganti dari "Restricted" jadi "Anyone with the link", role "Viewer", lalu Save. Ini WAJIB dilakukan sekali agar file HTML ini bisa dibuka dari komputer mana pun tanpa login.'));
+    }, JSONP_TIMEOUT_MS);
+
+    script.src = GVIZ_BASE + '?tqx=out:json;responseHandler:' + cbName +
+                 '&sheet=' + encodeURIComponent(LIVE_SHEET_NAME) + '&_ts=' + Date.now();
+    document.head.appendChild(script);
+  });
+}
+
+// Fetch data proyeksi stock (antrian tongkang) dari tab "Proyeksi Stock (Live)".
+// Fungsi TERPISAH dari fetchSheet() (bukan modifikasi) supaya tak ada risiko ke fitur
+// tarik-data-utama yg sudah teruji. Kalau tab/fitur ini belum ada, resolve ke array
+// kosong (bukan reject) -- krn proyeksi tongkang sifatnya OPSIONAL, tak boleh bikin
+// auto-refresh utama gagal hanya krn fitur tambahan ini belum di-setup.
+function fetchProjectionData(){
+  return new Promise(function(resolve){
+    var cbName = '__gvizProjCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
+    var script = document.createElement('script');
+    var timeoutId;
+    function cleanup(){
+      clearTimeout(timeoutId);
+      try { delete window[cbName]; } catch(e){ window[cbName]=undefined; }
+      if(script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = function(resp){
+      cleanup();
+      if(!resp || resp.status==='error' || !resp.table || !resp.table.rows || !resp.table.rows.length){
+        resolve([]); return;
+      }
+      var rows = resp.table.rows;
+      var out = [];
+      for(var i=0;i<rows.length;i++){
+        var c = rows[i].c;
+        if(!c || !c[0] || !c[1] || c[2]==null) continue; // baris info/kosong di bawah tabel -- lewati
+        var label = c[1].v, stock = c[2].v;
+        if(typeof stock !== 'number') continue;
+        out.push({d: String(label), v: Math.round(stock)});
+      }
+      resolve(out);
+    };
+    script.onerror = function(){ cleanup(); resolve([]); };
+    timeoutId = setTimeout(function(){ cleanup(); resolve([]); }, JSONP_TIMEOUT_MS);
+    script.src = GVIZ_BASE + '?tqx=out:json;responseHandler:' + cbName +
+                 '&sheet=' + encodeURIComponent(PROJECTION_SHEET_NAME) + '&_ts=' + Date.now();
+    document.head.appendChild(script);
+  });
+}
+
+function normalizeSlot(raw){
+  var s=String(raw).toUpperCase().replace(/[\s\-\|]/g,'');
+  var m=s.match(/^(CY[123])([A-F]\d?)$/);
+  if(!m) return null;
+  var cy=m[1], slot=m[2], letter=slot[0];
+  if(cy==='CY2'){
+    if('ABC'.indexOf(letter)>=0) return 'CY2u|'+slot;
+    if('DEF'.indexOf(letter)>=0) return 'CY2d|'+slot;
+    return null;
+  }
+  return cy+'|'+slot;
+}
+function parseSheetToStock(table){
+  if(!table.rows||!table.rows.length) throw new Error('Sheet kosong / tidak ada baris data.');
+  var cols=(table.cols||[]).map(function(c){return String(c.label||c.id||'').toUpperCase().trim();});
+  function findCol(keys){
+    for(var i=0;i<cols.length;i++) for(var j=0;j<keys.length;j++) if(cols[i].indexOf(keys[j])>=0) return i;
+    return -1;
+  }
+  var idxSlot=findCol(['SLOT','AREA','LOKASI']);
+  var idxShipper=findCol(['SHIPPER','KODE','SUPPLIER']);
+  var idxTon=findCol(['TONASE','TON','MT']);
+  var idxDate=findCol(['TANGGAL','DATE','TGL']);
+  if(idxSlot<0||idxShipper<0||idxTon<0){
+    throw new Error('Header tidak lengkap. Ditemukan: ['+cols.join(', ')+']. Perlu ada kolom SLOT, SHIPPER, TONASE (dan TANGGAL opsional).');
+  }
+  var newStock={}, skipped=0, invalidSlots=[], unknownShippers=[];
+  table.rows.forEach(function(row){
+    if(!row.c) return;
+    function cell(i){return row.c[i]&&row.c[i].v!=null?row.c[i]:null;}
+    var cSlot=cell(idxSlot), cShip=cell(idxShipper), cTon=cell(idxTon);
+    var cDate=idxDate>=0?cell(idxDate):null;
+    if(!cSlot||!cShip||!cTon){skipped++;return;}
+    var slot=normalizeSlot(cSlot.v);
+    if(!slot){skipped++; invalidSlots.push(String(cSlot.v)); return;}
+    var code=String(cShip.v).trim().toUpperCase();
+    if(!SHIPPERS[code]) unknownShippers.push(code);
+    var ton=parseFloat(cTon.v);
+    if(isNaN(ton)||ton<=0){skipped++;return;}
+    var dateStr='—';
+    if(cDate){ dateStr=String(cDate.f||cDate.v||'').trim(); }
+    if(!newStock[slot]) newStock[slot]=[];
+    newStock[slot].push({code:code,ton:ton,date:dateStr});
+  });
+  return {stock:newStock,skipped:skipped,invalidSlots:invalidSlots,unknownShippers:unknownShippers};
+}
+
+function testConnection(){
+  var btn=document.getElementById('btnTestConn');
+  var out=document.getElementById('testConnResult');
+  btn.disabled=true; btn.textContent='⏳ Testing...';
+  out.style.display='block';
+  out.textContent='Menghubungi tab "'+LIVE_SHEET_NAME+'"...';
+  fetchSheet()
+    .then(function(table){
+      var nRows=table.rows.length;
+      var headers=table.cols.map(function(c){return c.label||c.id||'?';}).filter(function(h){return h!=='?';});
+      var parsed=parseSheetToStock(table);
+      var slotCount=Object.keys(parsed.stock).length;
+      var totalTon=0; Object.keys(parsed.stock).forEach(function(k){parsed.stock[k].forEach(function(e){totalTon+=e.ton;});});
+      out.innerHTML='<span style="color:#a5d6a7;font-weight:bold;">✅ Koneksi berhasil!</span>\n'+
+        'Baris data raw: '+nRows+'\n'+
+        'Header: '+headers.slice(0,6).join(', ')+'\n'+
+        'Slot berhasil ter-parse: '+slotCount+'\n'+
+        'Total tonase terbaca: '+Math.round(totalTon).toLocaleString('id-ID')+' MT'+
+        (parsed.skipped>0?'\nBaris di-skip (subtotal/info panel, normal): '+parsed.skipped:'');
+    })
+    .catch(function(e){
+      out.innerHTML='<span style="color:#ef9a9a;font-weight:bold;">❌ Test gagal:</span>\n'+e.message;
+    })
+    .then(function(){ btn.disabled=false; btn.textContent='🔬 Test Koneksi (diagnosis)'; });
+}
+function doFetch(){
+  var info=currentShiftInfo();
+  if(isShiftLocked(info)){
+    calibToast(false,'GAGAL TARIK DATA','Shift ini sudah pernah menarik data. Gunakan "Reset kunci shift" jika perlu.');
+    return;
+  }
+  var btn=document.getElementById('btnFetch');
+  btn.disabled=true;
+  btn.textContent='⏳ Mengambil dari Google Sheet...';
+  fetchSheet()
+    .then(function(table){ return parseSheetToStock(table); })
+    .then(function(parsed){
+      pendingStock=parsed.stock;
+      showPreview(parsed);
+    })
+    .catch(function(e){
+      calibToast(false,'GAGAL TARIK DATA',e.message||String(e));
+      btn.disabled=false;
+      btn.textContent='🌐 Coba Tarik Lagi';
+    });
+}
+function showPreview(parsed){
+  var pTotal=0, pShip={}, nEntries=0;
+  Object.keys(parsed.stock).forEach(function(k){
+    parsed.stock[k].forEach(function(e){pTotal+=e.ton; pShip[e.code]=(pShip[e.code]||0)+e.ton; nEntries++;});
+  });
+  var cTotal=0;
+  Object.keys(STOCK).forEach(function(k){STOCK[k].forEach(function(e){cTotal+=e.ton;});});
+  var diff=pTotal-cTotal;
+  var diffCol=diff>=0?'#69f0ae':'#ef9a9a';
+  var html='<div style="font-size:12px;font-weight:bold;color:#a5d6a7;margin-bottom:6px;">Preview data yang akan dimuat:</div>';
+  html+='<div class="syncPrevRow"><span>Jumlah entri</span><b>'+nEntries+'</b></div>';
+  html+='<div class="syncPrevRow"><span>Slot terisi</span><b>'+Object.keys(parsed.stock).length+'</b></div>';
+  html+='<div class="syncPrevRow"><span>Total tonase baru</span><b>'+Math.round(pTotal).toLocaleString('id-ID')+' MT</b></div>';
+  html+='<div class="syncPrevRow"><span>Total saat ini</span><span style="color:#7f96ab;font-family:monospace;">'+Math.round(cTotal).toLocaleString('id-ID')+' MT</span></div>';
+  html+='<div class="syncPrevRow"><span>Selisih</span><b style="color:'+diffCol+';">'+(diff>=0?'+':'')+Math.round(diff).toLocaleString('id-ID')+' MT</b></div>';
+  if(parsed.skipped>0) html+='<div class="syncPrevRow"><span>Baris di-skip</span><span style="color:#ffab91;">'+parsed.skipped+'</span></div>';
+  if(parsed.invalidSlots.length) html+='<div style="font-size:10px;color:#ffab91;margin-top:6px;">⚠ Slot tidak dikenali: '+parsed.invalidSlots.slice(0,5).join(', ')+(parsed.invalidSlots.length>5?', ...':'')+'</div>';
+  if(parsed.unknownShippers.length){
+    var uniq=parsed.unknownShippers.filter(function(v,i,a){return a.indexOf(v)===i;});
+    html+='<div style="font-size:10px;color:#ffcc80;margin-top:4px;">⚠ Shipper baru (belum di kamus warna): '+uniq.slice(0,5).join(', ')+'</div>';
+  }
+  document.getElementById('syncPreview').innerHTML=html;
+  document.getElementById('syncPreview').style.display='block';
+  document.getElementById('syncApplyRow').style.display='flex';
+  document.getElementById('btnFetch').style.display='none';
+}
+function applyPending(){
+  if(!pendingStock) return;
+  // Kosongkan STOCK lalu isi dengan pending
+  Object.keys(STOCK).forEach(function(k){delete STOCK[k];});
+  Object.keys(pendingStock).forEach(function(k){STOCK[k]=pendingStock[k];});
+  // Refresh visual
+  Object.keys(tileMap).forEach(function(k){refreshTileColor(k);});
+  buildRightPanel();
+  refreshKPI();
+  rebuildShipperOutlines();
+  setShiftLock(currentShiftInfo());
+  pendingStock=null;
+  document.getElementById('syncPreview').style.display='none';
+  document.getElementById('syncApplyRow').style.display='none';
+  document.getElementById('btnFetch').style.display='block';
+  calibToast(true,'DATA BERHASIL DIMUAT','STOCK di-refresh dari Google Sheet. Shift ini terkunci sampai pergantian shift berikutnya.');
+  closeSyncModal();
+}
+function cancelPending(){
+  pendingStock=null;
+  document.getElementById('syncPreview').style.display='none';
+  document.getElementById('syncApplyRow').style.display='none';
+  document.getElementById('btnFetch').style.display='block';
+  var locked=isShiftLocked(currentShiftInfo());
+  document.getElementById('btnFetch').disabled=locked;
+  document.getElementById('btnFetch').textContent=locked?'🔒 Terkunci':'🌐 Tarik Data Sekarang';
+}
+function resetShiftLock(){
+  var info=currentShiftInfo();
+  if(!isShiftLocked(info)){ calibToast(false,'TIDAK ADA KUNCI','Shift ini belum pernah menarik data.'); return; }
+  if(!confirm('Reset kunci '+info.label+'? Setelah ini Anda bisa menarik data lagi. Gunakan hanya jika sheet baru saja diedit.')) return;
+  clearShiftLock(info);
+  renderSyncPanel();
+  calibToast(true,'KUNCI DI-RESET','Anda dapat menarik data lagi untuk '+info.label+'.');
+}
+
+// =========================================================================
+// AUTO-REFRESH OTOMATIS TIAP 5 MENIT
+// Berjalan terpisah dari kunci "sekali tarik per shift manual" (lock itu utk
+// tombol manual, bukan utk refresh otomatis ini). Amannya tetap terjaga krn
+// SUMBER datanya (tab "Stock per Slot (Live)") sendiri sudah dijamin oleh
+// Apps Script hanya berisi shift yg BENAR-BENAR sudah selesai -- jadi refresh
+// otomatis sesering apa pun tidak akan pernah menarik data shift yg blm
+// waktunya, persis seperti yg sudah dijelaskan sebelumnya.
+// =========================================================================
+var AUTO_REFRESH_MS = 5*60*1000; // 5 menit
+function autoRefreshTick(){
+  // Tampilkan jam kelipatan 5 menit yg SEDANG berlaku (08:00/08:05/dst), bukan jam eksekusi
+  // mentah -- supaya "tarik terakhir" selalu menunjukkan kelipatan 5 menit yg pas.
+  var alignedMark = new Date(Math.floor(Date.now()/AUTO_REFRESH_MS)*AUTO_REFRESH_MS);
+  var jamAligned = alignedMark.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  fetchSheet()
+    .then(function(table){ return parseSheetToStock(table); })
+    .then(function(parsed){
+      Object.keys(STOCK).forEach(function(k){delete STOCK[k];});
+      Object.keys(parsed.stock).forEach(function(k){STOCK[k]=parsed.stock[k];});
+      Object.keys(tileMap).forEach(function(k){refreshTileColor(k);});
+      buildRightPanel();
+      refreshKPI();
+      rebuildShipperOutlines();
+      calibToast(true,'DATA OTOMATIS DIPERBARUI','Refresh otomatis pukul '+jamAligned+' WIB');
+    })
+    .catch(function(e){
+      // Diam2 saja utk auto-refresh (jangan ganggu dgn popup tiap 5 menit kalau internet
+      // sempat putus sesaat) -- cukup dicatat ke console utk keperluan debug.
+      console.warn('[Auto-refresh] gagal:', e.message);
+    });
+  refreshProjectionData(); // proyeksi antrian tongkang ikut di-refresh tiap siklus yg sama
+}
+// Jadwalkan tepat di kelipatan 5 menit jam dinding (08:00, 08:05, 08:10, dst) -- bukan 5
+// menit dihitung sejak halaman dibuka. Dijadwalkan ULANG tiap kali (bukan setInterval
+// biasa) supaya tidak melenceng/drift dari kelipatan 5 menit yg sebenarnya.
+function scheduleNextAlignedRefresh(){
+  var msUntilNext = AUTO_REFRESH_MS - (Date.now() % AUTO_REFRESH_MS);
+  setTimeout(function(){
+    autoRefreshTick();
+    scheduleNextAlignedRefresh();
+  }, msUntilNext);
+}
+autoRefreshTick(); // panggil langsung sekali saat halaman dibuka -- tanpa ini, data baru
+                    // tertarik SETELAH 5 menit pertama (sebelumnya cuma nampilin nilai bawaan lama)
+scheduleNextAlignedRefresh(); // lalu lanjut tepat di tiap kelipatan 5 menit berikutnya
+
+// Judul/subjudul tanggal (sebelumnya teks statis "23 Jul 2026", tidak pernah berubah) --
+// sekarang diisi tanggal berjalan yg sebenarnya, diperbarui tiap kali halaman dibuka & tiap
+// auto-refresh (supaya selalu mencerminkan tanggal hari ini, bukan tanggal lama yg tertanam).
+var MONTHS_SHORT_ID_HDR = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+function updateDateHeaders(){
+  var d = new Date();
+  var label = d.getDate() + ' ' + MONTHS_SHORT_ID_HDR[d.getMonth()] + ' ' + d.getFullYear();
+  document.title = 'Coal Yard 3D — Stock ' + label;
+  var h2 = document.getElementById('mainTitleH2');
+  if(h2) h2.textContent = '🏭 Coal Yard 3D — ' + label;
+  var sub = document.getElementById('modalSubtitleDate');
+  if(sub) sub.textContent = 'Shipper aktif di coalyard ' + label;
+}
+updateDateHeaders();
+setInterval(updateDateHeaders, 60*1000); // cukup dicek tiap menit, tanggal jarang berubah
+refreshProjectionData(); // muat proyeksi sekali di awal saat halaman dibuka
+
+// Loop update jam tiap detik
+setInterval(updateClockPill,1000);
+updateClockPill();
+
+init3D(); buildRightPanel(); refreshKPI(); animate();
+</script>
+</body>
+</html>
