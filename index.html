@@ -243,23 +243,6 @@
   .color-list { padding:16px 14px 30px; display:flex; flex-direction:column; gap:8px; }
   .color-row { border-radius:12px; padding:13px 16px; font-weight:700; font-size:0.88rem; }
 
-  .back-float {
-    position:fixed;
-    left:16px;
-    bottom:calc(max(16px, env(safe-area-inset-bottom)) + 6px);
-    width:42px; height:42px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.92);
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 12px rgba(0,0,0,0.16);
-    z-index:6;
-    transition:transform .15s ease;
-  }
-  .back-float:active { transform:scale(0.92); }
-  .back-float svg { width:19px; height:19px; }
-  #detail.dark .back-float { background:rgba(255,255,255,0.14); }
-  #detail.dark .back-float svg path { stroke:#F2F4F7; }
-
   /* Tema gelap khusus untuk daftar Nama & NID */
   #detail.dark { background:#161A22; }
   #detail.dark .dtop { background:#10131A; border-bottom:1px solid #262B36; }
@@ -574,7 +557,6 @@
         <div class="wo-list" id="woList"></div>
       </div>
     </div>
-    <div class="back-float" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="#12161A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
   </div>
 
   <script>
