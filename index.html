@@ -182,6 +182,8 @@
   .dsubtitle { font-size:0.68rem; color:#8890A0; font-weight:600; margin-top:2px; }
   #detail.blue .dsubtitle { color:rgba(255,255,255,0.82); }
   .dbody { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative; }
+  #detail.embed .dbody { overflow:hidden; }
+  #detail.embed #detailContent { height:100%; }
 
   .wo-overlay {
     position:fixed; left:0; right:0; bottom:0;
@@ -841,7 +843,7 @@
       var subtitleEl = document.getElementById('detailSubtitle');
       var content = document.getElementById('detailContent');
       var detailEl = document.getElementById('detail');
-      detailEl.classList.remove('dark', 'blue');
+      detailEl.classList.remove('dark', 'blue', 'embed');
       closeWO();
       if (title === 'Nama & NID') {
         var tpl = document.getElementById('namaNidTemplate');
@@ -853,6 +855,10 @@
         content.innerHTML = buildCHFGrid();
         detailEl.classList.add('blue');
         subtitleEl.textContent = 'Tarikan data terupdate · Pukul 09:00 WIB · By Whatsapp';
+      } else if (title === 'Peta Coalyard') {
+        content.innerHTML = '<iframe src="coalyard-simulator.html" style="width:100%;height:100%;border:0;display:block;background:#1a1a1a;"></iframe>';
+        detailEl.classList.add('embed');
+        subtitleEl.textContent = '';
       } else {
         content.innerHTML = '';
         subtitleEl.textContent = '';
