@@ -114,13 +114,41 @@ var FIVES_DATA = {"2022-1-1":["ID Fan A & Lube Oil System","Booster Pump A & B",
     function dateLabel(d) { return HARI[d.getDay()] + ', ' + d.getDate() + ' ' + BULAN[d.getMonth()] + ' ' + d.getFullYear(); }
     function isToday(d) { return dateKey(d) === dateKey(today); }
 
+    // Daftar singkatan teknis yang harus tetap huruf besar semua
+    var ABBR = new Set(['HP','HV','IDF','ERH','SAC','APH','MBFP','CEP','FAD','CAC','IAC','DCS','CCTV','WO','SR',
+      'SU','TT','ESP','BFPT','FDF','FOP','RO','SWRO','BWRO','PCRD','MS','FF','WA','CHF','AHF','GCV','HGI','KSF',
+      'OCEA','PLN','UPTA','EDG','CWP','IPAL','RTPM','FLM','SSC','BAS','TWS','DM','BA','FAS','IAD','PA','FD','ID',
+      'CWHE','HMI','SW','FC','NID','PKU','OMAMO','AC','DC','BFP','FGD','ACC','CT','GT','ST','HRSG','PLTU','MCC',
+      'VFD','PMS','LBS','CB','DS','PT','CVT','RTD','PLC','UPS','AVR','ATS','MOV','SOV','NRV','LP','MP','HHP',
+      'BAP','BAF','FAF','GRC','SCR','ID1','OMC']);
+
+    // Kata sambung yang selalu huruf kecil (kecuali di awal kalimat)
+    var CONNECTORS = new Set(['dan','di','ke','dari','untuk','pada','dengan','atau','yang','dalam','oleh','serta','per','akan','juga']);
+
+    function cleanItem(t) {
+      return String(t).replace(/^-+\s*/, '');
+    }
+
+    function properCase(str) {
+      var firstDone = false;
+      return String(str).replace(/[A-Za-z0-9#]+/g, function(match) {
+        var isFirst = !firstDone;
+        firstDone = true;
+        var upper = match.toUpperCase();
+        if (/\d/.test(match)) return upper;
+        if (ABBR.has(upper)) return upper;
+        if (!isFirst && CONNECTORS.has(match.toLowerCase())) return match.toLowerCase();
+        return match.charAt(0).toUpperCase() + match.slice(1).toLowerCase();
+      });
+    }
+
     function itemsBlock(items, cls) {
       if (!items || items.length === 0) {
         return '<div class="item-card dash">–</div>';
       }
       var html = '';
       items.forEach(function(t, i) {
-        html += '<div class="item-card ' + cls + '">' + (i+1) + '. ' + t + '</div>';
+        html += '<div class="item-card ' + cls + '">' + (i+1) + '. ' + properCase(cleanItem(t)) + '</div>';
       });
       return html;
     }
@@ -158,13 +186,13 @@ var FIVES_DATA = {"2022-1-1":["ID Fan A & Lube Oil System","Booster Pump A & B",
       var text = '*Informasi jadwal RTPM & 5S*\n*' + dateLabel(currentDate) + '*\n\n';
       text += '*RTPM*\n';
       if (rtpmItems && rtpmItems.length) {
-        rtpmItems.forEach(function(t, i) { text += (i+1) + '. ' + t + '\n'; });
+        rtpmItems.forEach(function(t, i) { text += (i+1) + '. ' + properCase(cleanItem(t)) + '\n'; });
       } else {
         text += '-\n';
       }
       text += '\n*5S*\n';
       if (fivesItems && fivesItems.length) {
-        fivesItems.forEach(function(t, i) { text += (i+1) + '. ' + t + '\n'; });
+        fivesItems.forEach(function(t, i) { text += (i+1) + '. ' + properCase(cleanItem(t)) + '\n'; });
       } else {
         text += '-\n';
       }
