@@ -120,20 +120,26 @@ var FIVES_DATA = {"2022-1-1":["ID Fan A & Lube Oil System","Booster Pump A & B",
       'OCEA','PLN','UPTA','EDG','CWP','IPAL','RTPM','FLM','SSC','BAS','TWS','DM','BA','FAS','IAD','PA','FD','ID',
       'CWHE','HMI','SW','FC','NID','PKU','OMAMO','AC','DC','BFP','FGD','ACC','CT','GT','ST','HRSG','PLTU','MCC',
       'VFD','PMS','LBS','CB','DS','PT','CVT','RTD','PLC','UPS','AVR','ATS','MOV','SOV','NRV','LP','MP','HHP',
-      'BAP','BAF','FAF','GRC','SCR','ID1','OMC']);
+      'BAP','BAF','FAF','GRC','SCR','ID1','OMC','PAF','OCCWP','WDE','HPH','LPH','AOP','MOP','SUB','DG','WWTP','JOP']);
 
     // Kata sambung yang selalu huruf kecil (kecuali di awal kalimat)
     var CONNECTORS = new Set(['dan','di','ke','dari','untuk','pada','dengan','atau','yang','dalam','oleh','serta','per','akan','juga']);
 
     function cleanItem(t) {
-      return String(t).replace(/^-+\s*/, '');
+      var s = String(t).replace(/^-+\s*/, '');
+      // Hapus kata yang berulang bersebelahan (mis. "PUMP Pump" -> "PUMP")
+      s = s.replace(/\b([A-Za-z]+)([ ,]+)\1\b/gi, '$1');
+      return s;
     }
 
     function properCase(str) {
+      var s = String(str);
       var firstDone = false;
-      return String(str).replace(/[A-Za-z0-9#]+/g, function(match) {
+      return s.replace(/[A-Za-z0-9#]+/g, function(match) {
         var isFirst = !firstDone;
         firstDone = true;
+        // Jika kata ini sudah ada huruf kecilnya di tulisan asli, biarkan apa adanya
+        if (/[a-z]/.test(match)) return match;
         var upper = match.toUpperCase();
         if (/\d/.test(match)) return upper;
         if (ABBR.has(upper)) return upper;
