@@ -334,6 +334,13 @@
   }
   .asman-row .nid-id { color:rgba(255,255,255,0.9); font-weight:700; }
   .asman-row .nid-name { color:#fff; font-weight:800; }
+
+  .ht-idwrap { width:100px; flex-shrink:0; margin-right:16px; display:flex; flex-direction:column; }
+  .ht-type { font-size:0.64rem; font-weight:800; letter-spacing:0.02em; margin-bottom:2px; }
+  .ht-type.cp { color:#22C55E; }
+  .ht-type.xir { color:#4DB8FF; }
+  .ht-sn { color:#8FA0B8; font-weight:600; }
+  .asman-row .ht-sn { color:rgba(255,255,255,0.9); }
 </style>
 </head>
 <body>
@@ -536,69 +543,70 @@
     </div>
   </template>
 
-  <template id="dataHtTemplate">
+    <template id="dataHtTemplate">
     <div class="nid-wrap">
       <div class="nid-card">
         <div class="nid-shift">CHCB A</div>
-        <div class="asman-row"><div class="nid-no"></div><div class="nid-id">1335TM6038</div><div class="nid-name">I NYOMAN KUNCORO</div></div>
-        <div class="nid-row"><div class="nid-no">1</div><div class="nid-id">1338NZ6940</div><div class="nid-name">ADI SETYAWAN</div></div>
-        <div class="nid-row"><div class="nid-no">2</div><div class="nid-id">1335UR1025</div><div class="nid-name">AHMAD WILDAN NURIL HAKIM</div></div>
-        <div class="nid-row"><div class="nid-no">3</div><div class="nid-id">278TAM0673</div><div class="nid-name">AKHMAD SYABIL MARUZI</div></div>
-        <div class="nid-row"><div class="nid-no">4</div><div class="nid-id">278TAM0723</div><div class="nid-name">ANDI ACHMAD</div></div>
-        <div class="nid-row"><div class="nid-no">5</div><div class="nid-id">278TAKU578</div><div class="nid-name">ENDRO PRASETYO</div></div>
-        <div class="nid-row"><div class="nid-no">6</div><div class="nid-id">278TAMN825</div><div class="nid-name">HARTONO</div></div>
-        <div class="nid-row"><div class="nid-no">7</div><div class="nid-id">278TAM0657</div><div class="nid-name">IMAM FITRONI</div></div>
-        <div class="nid-row"><div class="nid-no">8</div><div class="nid-id">1335QS1301</div><div class="nid-name">MUH. BAHARRUDIN ALWI</div></div>
-        <div class="nid-row"><div class="nid-no">9</div><div class="nid-id">278TAKA854</div><div class="nid-name">RAHMAD PRIADI</div></div>
-        <div class="nid-row"><div class="nid-no">10</div><div class="nid-id">1338RA3625</div><div class="nid-name">SUSCAHYO DEDI</div></div>
+        <div class="asman-row"><div class="nid-no"></div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335TM6038</div></div><div class="nid-name">I NYOMAN KUNCORO</div></div>
+        <div class="nid-row"><div class="nid-no">1</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1338NZ6940</div></div><div class="nid-name">ADI SETYAWAN</div></div>
+        <div class="nid-row"><div class="nid-no">2</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335UR1025</div></div><div class="nid-name">AHMAD WILDAN NURIL HAKIM</div></div>
+        <div class="nid-row"><div class="nid-no">3</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAM0673</div></div><div class="nid-name">AKHMAD SYABIL MARUZI</div></div>
+        <div class="nid-row"><div class="nid-no">4</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAM0723</div></div><div class="nid-name">ANDI ACHMAD</div></div>
+        <div class="nid-row"><div class="nid-no">5</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKU578</div></div><div class="nid-name">ENDRO PRASETYO</div></div>
+        <div class="nid-row"><div class="nid-no">6</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAMN825</div></div><div class="nid-name">HARTONO</div></div>
+        <div class="nid-row"><div class="nid-no">7</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAM0657</div></div><div class="nid-name">IMAM FITRONI</div></div>
+        <div class="nid-row"><div class="nid-no">8</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335QS1301</div></div><div class="nid-name">MUH. BAHARRUDIN ALWI</div></div>
+        <div class="nid-row"><div class="nid-no">9</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKA854</div></div><div class="nid-name">RAHMAD PRIADI</div></div>
+        <div class="nid-row"><div class="nid-no">10</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1338RA3625</div></div><div class="nid-name">SUSCAHYO DEDI</div></div>
       </div>
 
       <div class="nid-card">
         <div class="nid-shift">CHCB B</div>
-        <div class="asman-row"><div class="nid-no"></div><div class="nid-id">1338NZ6962</div><div class="nid-name">SRI SOEMARETA</div></div>
-        <div class="nid-row"><div class="nid-no">1</div><div class="nid-id">1338PZ6080</div><div class="nid-name">ACHMAD ZAM ZAMI FITHRI</div></div>
-        <div class="nid-row"><div class="nid-no">2</div><div class="nid-id">278TAKA815</div><div class="nid-name">BUDI SUWITO</div></div>
-        <div class="nid-row"><div class="nid-no">3</div><div class="nid-id">278TAKA864</div><div class="nid-name">EGO SUSILO HERAYA</div></div>
-        <div class="nid-row"><div class="nid-no">4</div><div class="nid-id">1335VL2983</div><div class="nid-name">FREDY PRATAMA YUDHA</div></div>
-        <div class="nid-row"><div class="nid-no">5</div><div class="nid-id">278TAKA881</div><div class="nid-name">GEMPUR BEBASNO</div></div>
-        <div class="nid-row"><div class="nid-no">6</div><div class="nid-id">278TAMN889</div><div class="nid-name">ILHAM DWI ARFIANSYAH</div></div>
-        <div class="nid-row"><div class="nid-no">7</div><div class="nid-id">1335VV2588</div><div class="nid-name">LINGGA WIJAYADI</div></div>
-        <div class="nid-row"><div class="nid-no">8</div><div class="nid-id">278TAMN767</div><div class="nid-name">M. BURHANUNUDDIN PAMUNGKAS</div></div>
-        <div class="nid-row"><div class="nid-no">9</div><div class="nid-id">278TAKA717</div><div class="nid-name">MUHAMMAD NURUL QOLBI</div></div>
-        <div class="nid-row"><div class="nid-no">10</div><div class="nid-id">278TAMN712</div><div class="nid-name">SISWANTO</div></div>
+        <div class="asman-row"><div class="nid-no"></div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1338NZ6962</div></div><div class="nid-name">SRI SOEMARETA</div></div>
+        <div class="nid-row"><div class="nid-no">1</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1338PZ6080</div></div><div class="nid-name">ACHMAD ZAM ZAMI FITHRI</div></div>
+        <div class="nid-row"><div class="nid-no">2</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKA815</div></div><div class="nid-name">BUDI SUWITO</div></div>
+        <div class="nid-row"><div class="nid-no">3</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKA864</div></div><div class="nid-name">EGO SUSILO HERAYA</div></div>
+        <div class="nid-row"><div class="nid-no">4</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335VL2983</div></div><div class="nid-name">FREDY PRATAMA YUDHA</div></div>
+        <div class="nid-row"><div class="nid-no">5</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKA881</div></div><div class="nid-name">GEMPUR BEBASNO</div></div>
+        <div class="nid-row"><div class="nid-no">6</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAMN889</div></div><div class="nid-name">ILHAM DWI ARFIANSYAH</div></div>
+        <div class="nid-row"><div class="nid-no">7</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335VV2588</div></div><div class="nid-name">LINGGA WIJAYADI</div></div>
+        <div class="nid-row"><div class="nid-no">8</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAMN767</div></div><div class="nid-name">M. BURHANUNUDDIN PAMUNGKAS</div></div>
+        <div class="nid-row"><div class="nid-no">9</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKA717</div></div><div class="nid-name">MUHAMMAD NURUL QOLBI</div></div>
+        <div class="nid-row"><div class="nid-no">10</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAMN712</div></div><div class="nid-name">SISWANTO</div></div>
       </div>
 
       <div class="nid-card">
         <div class="nid-shift">CHCB C</div>
-        <div class="asman-row"><div class="nid-no"></div><div class="nid-id">1335VW2122</div><div class="nid-name">YUDI CHOIRUL UMAM</div></div>
-        <div class="nid-row"><div class="nid-no">1</div><div class="nid-id">278TAM0768</div><div class="nid-name">ADAM DWI KANSUMAN</div></div>
-        <div class="nid-row"><div class="nid-no">2</div><div class="nid-id">278TAM0717</div><div class="nid-name">BUYUNG ANUGERAH</div></div>
-        <div class="nid-row"><div class="nid-no">3</div><div class="nid-id">278TAKU673</div><div class="nid-name">ERWIN CANDRA SETIAWAN</div></div>
-        <div class="nid-row"><div class="nid-no">4</div><div class="nid-id">278TAKU707</div><div class="nid-name">LAHURI SUBAKTIYO</div></div>
-        <div class="nid-row"><div class="nid-no">5</div><div class="nid-id">278TAKU666</div><div class="nid-name">M. KHAMIDUDDIN</div></div>
-        <div class="nid-row"><div class="nid-no">6</div><div class="nid-id">278TAM0758</div><div class="nid-name">MOH FAHRUDIN FAJAR ROMADLON</div></div>
-        <div class="nid-row"><div class="nid-no">7</div><div class="nid-id">1335TX0296</div><div class="nid-name">MOHAMMAD TAUFIK</div></div>
-        <div class="nid-row"><div class="nid-no">8</div><div class="nid-id">1335VG1699</div><div class="nid-name">MUHAMMAD NURDIN</div></div>
-        <div class="nid-row"><div class="nid-no">9</div><div class="nid-id">1335TK5478</div><div class="nid-name">NOVAN HERMAWAN</div></div>
-        <div class="nid-row"><div class="nid-no">10</div><div class="nid-id">278TAKU721</div><div class="nid-name">RUDI WIYANTO</div></div>
-        <div class="nid-row"><div class="nid-no">11</div><div class="nid-id">1335VW2109</div><div class="nid-name">SYAIFUL ALI</div></div>
+        <div class="asman-row"><div class="nid-no"></div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335VW2122</div></div><div class="nid-name">YUDI CHOIRUL UMAM</div></div>
+        <div class="nid-row"><div class="nid-no">1</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAM0768</div></div><div class="nid-name">ADAM DWI KANSUMAN</div></div>
+        <div class="nid-row"><div class="nid-no">2</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAM0717</div></div><div class="nid-name">BUYUNG ANUGERAH</div></div>
+        <div class="nid-row"><div class="nid-no">3</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKU673</div></div><div class="nid-name">ERWIN CANDRA SETIAWAN</div></div>
+        <div class="nid-row"><div class="nid-no">4</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKU707</div></div><div class="nid-name">LAHURI SUBAKTIYO</div></div>
+        <div class="nid-row"><div class="nid-no">5</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKU666</div></div><div class="nid-name">M. KHAMIDUDDIN</div></div>
+        <div class="nid-row"><div class="nid-no">6</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAM0758</div></div><div class="nid-name">MOH FAHRUDIN FAJAR ROMADLON</div></div>
+        <div class="nid-row"><div class="nid-no">7</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335TX0296</div></div><div class="nid-name">MOHAMMAD TAUFIK</div></div>
+        <div class="nid-row"><div class="nid-no">8</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335VG1699</div></div><div class="nid-name">MUHAMMAD NURDIN</div></div>
+        <div class="nid-row"><div class="nid-no">9</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335TK5478</div></div><div class="nid-name">NOVAN HERMAWAN</div></div>
+        <div class="nid-row"><div class="nid-no">10</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKU721</div></div><div class="nid-name">RUDI WIYANTO</div></div>
+        <div class="nid-row"><div class="nid-no">11</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335VW2109</div></div><div class="nid-name">SYAIFUL ALI</div></div>
       </div>
 
       <div class="nid-card">
         <div class="nid-shift">CHCB D</div>
-        <div class="asman-row"><div class="nid-no"></div><div class="nid-id">1335VW2104</div><div class="nid-name">RUDY HADI KURNIAWAN</div></div>
-        <div class="nid-row"><div class="nid-no">1</div><div class="nid-id">1335VV2707</div><div class="nid-name">ANGGA RISQY PUTRA</div></div>
-        <div class="nid-row"><div class="nid-no">2</div><div class="nid-id">1335RL0856</div><div class="nid-name">BIMA VALENTINO AJI</div></div>
-        <div class="nid-row"><div class="nid-no">3</div><div class="nid-id">278TAKA905</div><div class="nid-name">DICKI DWI SYAHROHADI</div></div>
-        <div class="nid-row"><div class="nid-no">4</div><div class="nid-id">278TAM0669</div><div class="nid-name">DWI DARMAWAN</div></div>
-        <div class="nid-row"><div class="nid-no">5</div><div class="nid-id">1335TW7254</div><div class="nid-name">GAMA YAMAFI</div></div>
-        <div class="nid-row"><div class="nid-no">6</div><div class="nid-id">278TAKA840</div><div class="nid-name">M. WAHYUDIANTO</div></div>
-        <div class="nid-row"><div class="nid-no">7</div><div class="nid-id">1338PV4169</div><div class="nid-name">MIFTAKHUL ULUM</div></div>
-        <div class="nid-row"><div class="nid-no">8</div><div class="nid-id">278TAJ0072</div><div class="nid-name">MOCHAMAD MUSOLINI</div></div>
-        <div class="nid-row"><div class="nid-no">9</div><div class="nid-id">1335VW2117</div><div class="nid-name">SAIFUDIN ABDILLAH</div></div>
-        <div class="nid-row"><div class="nid-no">10</div><div class="nid-id">1338NZ6980</div><div class="nid-name">SATRIO PUJO LEGOWO</div></div>
-        <div class="nid-row"><div class="nid-no">11</div><div class="nid-id">278TAKA839</div><div class="nid-name">WAHYU DWI PRATITIS</div></div>
+        <div class="asman-row"><div class="nid-no"></div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335VW2104</div></div><div class="nid-name">RUDY HADI KURNIAWAN</div></div>
+        <div class="nid-row"><div class="nid-no">1</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335VV2707</div></div><div class="nid-name">ANGGA RISQY PUTRA</div></div>
+        <div class="nid-row"><div class="nid-no">2</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335RL0856</div></div><div class="nid-name">BIMA VALENTINO AJI</div></div>
+        <div class="nid-row"><div class="nid-no">3</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKA905</div></div><div class="nid-name">DICKI DWI SYAHROHADI</div></div>
+        <div class="nid-row"><div class="nid-no">4</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAM0669</div></div><div class="nid-name">DWI DARMAWAN</div></div>
+        <div class="nid-row"><div class="nid-no">5</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335TW7254</div></div><div class="nid-name">GAMA YAMAFI</div></div>
+        <div class="nid-row"><div class="nid-no">6</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKA840</div></div><div class="nid-name">M. WAHYUDIANTO</div></div>
+        <div class="nid-row"><div class="nid-no">7</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1338PV4169</div></div><div class="nid-name">MIFTAKHUL ULUM</div></div>
+        <div class="nid-row"><div class="nid-no">8</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAJ0072</div></div><div class="nid-name">MOCHAMAD MUSOLINI</div></div>
+        <div class="nid-row"><div class="nid-no">9</div><div class="ht-idwrap"><div class="ht-type cp">CP1660</div><div class="ht-sn">1335VW2117</div></div><div class="nid-name">SAIFUDIN ABDILLAH</div></div>
+        <div class="nid-row"><div class="nid-no">10</div><div class="ht-idwrap"><div class="ht-sn">1338NZ6980</div></div><div class="nid-name">SATRIO PUJO LEGOWO</div></div>
+        <div class="nid-row"><div class="nid-no">11</div><div class="ht-idwrap"><div class="ht-type xir">XIR C2660</div><div class="ht-sn">278TAKA839</div></div><div class="nid-name">WAHYU DWI PRATITIS</div></div>
       </div>
+
     </div>
   </template>
 
