@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Line-Up Tongkang</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; background:#F2F4F7; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+
+  .wrap { padding:16px 14px 40px; }
+
+  .status-bar {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:14px;
+    font-size:0.74rem; color:#8890A0; font-weight:600;
+  }
+  .status-bar .refresh-btn {
+    background:#fff; border:1px solid #E4E7EB; border-radius:8px;
+    padding:5px 10px; font-weight:700; color:#1362C4; cursor:pointer;
+  }
+
+  .section-title {
+    font-weight:800; font-size:0.92rem; margin:16px 2px 8px; display:flex; align-items:center; gap:8px;
+  }
+  .section-title.first { margin-top:0; }
+  .section-dot { width:9px; height:9px; border-radius:50%; }
+  .section-dot.green { background:#16A34A; }
+  .section-dot.yellow { background:#D97706; }
+  .section-dot.blue { background:#1362C4; }
+
+  .tb-card {
+    background:#fff; border-radius:16px; padding:14px 16px; margin-bottom:10px;
+    box-shadow:0 3px 10px rgba(20,30,55,0.06); border:1px solid #ECEFF3;
+  }
+  .tb-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .tb-names { font-weight:800; font-size:0.9rem; color:#12161A; }
+  .tb-badge { font-size:0.66rem; font-weight:800; padding:3px 8px; border-radius:8px; color:#fff; flex-shrink:0; }
+  .tb-badge.green { background:#16A34A; }
+  .tb-badge.yellow { background:#D97706; }
+  .tb-badge.blue { background:#1362C4; }
+
+  .tb-row { display:flex; font-size:0.8rem; padding:3px 0; }
+  .tb-row .label { width:76px; flex-shrink:0; color:#8890A0; font-weight:600; }
+  .tb-row .val { color:#333A44; font-weight:600; flex:1; }
+
+  .empty-msg, .loading-msg, .error-msg { text-align:center; padding:50px 20px; color:#8890A0; font-size:0.88rem; }
+  .error-msg { color:#DC2626; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="status-bar">
+      <span id="statusText">Memuat data...</span>
+      <span class="refresh-btn" onclick="loadData()">Muat Ulang</span>
+    </div>
+    <div id="content"></div>
+  </div>
+
+  <script>
+    var SHEET_ID = '1CBAiSjJ2XJPmzlAOntxoaFwRL7qPcK3jwbU-7doa62s';
+    var GID = '130131131';
+    var URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&gid=' + GID;
+
+    function sectionMeta(section) {
+      var s = (section || '').toLowerCase();
+      if (s.indexOf('selesai') > -1) return { color:'green', label:'Selesai Bongkar' };
+      if (s.indexOf('otw') > -1) return { color:'blue', label:'OTW' };
+      return { color:'yellow', label:'Antri' };
+    }
+
+    function esc(v) { return (v === null || v === undefined) ? '' : String(v); }
+
+    function buildRow(label, val) {
+      if (!val) return '';
+      return '<div class="tb-row"><div class="label">' + label + '</div><div class="val">' + esc(val) + '</div></div>';
+    }
+
+    function render(rows) {
+      var content = document.getElementById('content');
+      if (!rows.length) {
+        content.innerHTML = '<div class="empty-msg">Tidak ada data line-up tongkang saat ini</div>';
+        return;
+      }
+      var groups = {};
+      var order = [];
+      rows.forEach(function(r) {
+        var meta = sectionMeta(r.section);
+        if (!groups[meta.label]) { groups[meta.label] = { meta: meta, items: [] }; order.push(meta.label); }
+        groups[meta.label].items.push(r);
+      });
+
+      var html = '';
+      order.forEach(function(label, idx) {
+        var g = groups[label];
+        html += '<div class="section-title' + (idx === 0 ? ' first' : '') + '"><span class="section-dot ' + g.meta.color + '"></span>' + label + ' (' + g.items.length + ')</div>';
+        g.items.forEach(function(r) {
+          html += '<div class="tb-card">';
+          html += '<div class="tb-top"><div class="tb-names">' + esc(r.tb) + ' / ' + esc(r.bg) + '</div><div class="tb-badge ' + g.meta.color + '">No. ' + esc(r.nomor) + '</div></div>';
+          html += buildRow('Shipper', r.shipper);
+          html += buildRow('Agent', r.agent);
+          html += buildRow('Tonase', r.bl ? r.bl + ' MT' : '');
+          html += buildRow('Asal', r.asal);
+          html += buildRow('Tiba (TA)', r.ta);
+          html += buildRow('ETA', r.eta);
+          html += buildRow('Sandar', r.sandar);
+          html += buildRow('Bongkar', r.bongkar);
+          html += buildRow('Selesai', r.selesai);
+          html += buildRow('Draft Survey', r.ds);
+          html += buildRow('Catatan', r.catatan);
+          html += '</div>';
+        });
+      });
+      content.innerHTML = html;
+    }
+
+    function loadData() {
+      document.getElementById('statusText').textContent = 'Memuat data...';
+      var script = document.createElement('script');
+      var callbackName = 'gsCallback_' + Date.now();
+      window[callbackName] = function() {};
+      fetch(URL)
+        .then(function(res) { return res.text(); })
+        .then(function(text) {
+          var jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+          var data = JSON.parse(jsonStr);
+          var cols = data.table.cols.map(function(c){ return c.label; });
+          var rows = data.table.rows.map(function(row) {
+            var get = function(idx) { return row.c[idx] ? row.c[idx].f || row.c[idx].v : ''; };
+            return {
+              tanggal: get(1), pukul: get(2), section: get(4), nomor: get(5), status: get(6),
+              tb: get(7), bg: get(8), shipper: get(9), agent: get(10), bl: get(11), asal: get(12),
+              ta: get(13), eta: get(14), sandar: get(15), bongkar: get(16), selesai: get(17), ds: get(18),
+              catatan: get(24)
+            };
+          }).filter(function(r) { return r.tb || r.bg; });
+          render(rows);
+          var now = new Date();
+          document.getElementById('statusText').textContent = 'Terakhir dimuat: ' + now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+        })
+        .catch(function(err) {
+          document.getElementById('statusText').textContent = 'Gagal memuat data';
+          document.getElementById('content').innerHTML = '<div class="error-msg">Tidak bisa mengambil data dari Google Sheet.<br>Pastikan sheet dibagikan sebagai "Anyone with the link can view".</div>';
+        });
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
