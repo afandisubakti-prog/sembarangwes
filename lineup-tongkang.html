@@ -6,52 +6,78 @@
 <title>Line-Up Tongkang</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body { height:100%; background:#F2F4F7; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  html, body {
+    height:100%;
+    background:linear-gradient(160deg, #29A0F0 0%, #1362C4 55%, #0D3E7A 100%);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+  }
 
   .wrap { padding:16px 14px 40px; }
 
   .status-bar {
     display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:14px;
-    font-size:0.74rem; color:#8890A0; font-weight:600;
+    gap:10px;
+    margin-bottom:16px;
+    padding:12px 14px;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.18);
+    border-radius:14px;
+    backdrop-filter:blur(6px);
   }
+  .status-bar .status-text { font-size:0.74rem; color:#fff; font-weight:600; line-height:1.5; }
+  .status-bar .status-text b { font-weight:800; }
+  .status-bar .status-sub { font-size:0.68rem; color:rgba(255,255,255,0.75); font-weight:600; }
   .status-bar .refresh-btn {
-    background:#fff; border:1px solid #E4E7EB; border-radius:8px;
-    padding:5px 10px; font-weight:700; color:#1362C4; cursor:pointer;
+    background:rgba(255,255,255,0.95); border:none; border-radius:10px;
+    padding:8px 14px; font-weight:800; color:#1362C4; cursor:pointer;
+    flex-shrink:0;
+    transition:transform .15s ease, box-shadow .15s ease;
+    box-shadow:0 4px 10px rgba(0,0,0,0.15);
   }
+  .refresh-btn:active { transform:scale(0.94); }
 
   .section-title {
-    font-weight:800; font-size:0.92rem; margin:16px 2px 8px; display:flex; align-items:center; gap:8px;
+    font-weight:800; font-size:0.9rem; margin:18px 2px 10px;
+    display:flex; align-items:center; gap:8px;
+    color:#fff;
   }
   .section-title.first { margin-top:0; }
-  .section-dot { width:9px; height:9px; border-radius:50%; }
-  .section-dot.green { background:#16A34A; }
-  .section-dot.yellow { background:#D97706; }
-  .section-dot.blue { background:#1362C4; }
+  .section-dot { width:9px; height:9px; border-radius:50%; box-shadow:0 0 8px currentColor; }
+  .section-dot.green { background:#4ADE80; color:#4ADE80; }
+  .section-dot.yellow { background:#FBBF24; color:#FBBF24; }
+  .section-dot.blue { background:#7DD3FC; color:#7DD3FC; }
 
   .tb-card {
-    background:#fff; border-radius:16px; padding:14px 16px; margin-bottom:10px;
-    box-shadow:0 3px 10px rgba(20,30,55,0.06); border:1px solid #ECEFF3;
+    background:rgba(255,255,255,0.96);
+    border-radius:16px; padding:14px 16px; margin-bottom:12px;
+    box-shadow:0 10px 24px rgba(10,25,55,0.22);
+    border:1px solid rgba(255,255,255,0.5);
+    transition:transform .16s cubic-bezier(0.22,1,0.36,1), box-shadow .16s ease;
   }
-  .tb-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .tb-card:active { transform:scale(0.985); }
+  .tb-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:8px; }
   .tb-names { font-weight:800; font-size:0.9rem; color:#12161A; }
-  .tb-badge { font-size:0.66rem; font-weight:800; padding:3px 8px; border-radius:8px; color:#fff; flex-shrink:0; }
-  .tb-badge.green { background:#16A34A; }
-  .tb-badge.yellow { background:#D97706; }
-  .tb-badge.blue { background:#1362C4; }
+  .tb-badge { font-size:0.66rem; font-weight:800; padding:4px 9px; border-radius:8px; color:#fff; flex-shrink:0; }
+  .tb-badge.green { background:linear-gradient(135deg,#22C55E,#15803D); }
+  .tb-badge.yellow { background:linear-gradient(135deg,#FBBF24,#D97706); }
+  .tb-badge.blue { background:linear-gradient(135deg,#29A0F0,#1362C4); }
 
   .tb-row { display:flex; font-size:0.8rem; padding:3px 0; }
   .tb-row .label { width:76px; flex-shrink:0; color:#8890A0; font-weight:600; }
   .tb-row .val { color:#333A44; font-weight:600; flex:1; }
 
-  .empty-msg, .loading-msg, .error-msg { text-align:center; padding:50px 20px; color:#8890A0; font-size:0.88rem; }
-  .error-msg { color:#DC2626; }
+  .empty-msg, .loading-msg, .error-msg { text-align:center; padding:50px 20px; color:rgba(255,255,255,0.85); font-size:0.88rem; }
+  .error-msg { color:#FCA5A5; }
 </style>
 </head>
 <body>
   <div class="wrap">
     <div class="status-bar">
-      <span id="statusText">Memuat data...</span>
+      <div>
+        <div class="status-text" id="statusText">Memuat data...</div>
+        <div class="status-sub" id="statusSub"></div>
+      </div>
       <span class="refresh-btn" onclick="loadData()">Muat Ulang</span>
     </div>
     <div id="content"></div>
@@ -135,11 +161,21 @@
             };
           }).filter(function(r) { return r.tb || r.bg; });
           render(rows);
-          var now = new Date();
-          document.getElementById('statusText').textContent = 'Terakhir dimuat: ' + now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+          var BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+          var reportTanggal = rows.length ? rows[0].tanggal : '';
+          var reportPukul = rows.length ? rows[0].pukul : '';
+          var today = new Date();
+          var todayStr = today.getDate() + ' ' + BULAN[today.getMonth()] + ' ' + today.getFullYear();
+          var isToday = reportTanggal && reportTanggal.replace(/\s+/g,' ').trim() === todayStr;
+          var whenText = reportTanggal
+            ? (isToday ? ('hari ini pukul ' + reportPukul) : (reportTanggal + ' pukul ' + reportPukul))
+            : 'tidak diketahui';
+          document.getElementById('statusText').innerHTML = 'Terakhir dimuat <b>' + whenText + '</b>';
+          document.getElementById('statusSub').textContent = 'Sumber : Laporan Whatsapp Grup';
         })
         .catch(function(err) {
           document.getElementById('statusText').textContent = 'Gagal memuat data';
+          document.getElementById('statusSub').textContent = '';
           document.getElementById('content').innerHTML = '<div class="error-msg">Tidak bisa mengambil data dari Google Sheet.<br>Pastikan sheet dibagikan sebagai "Anyone with the link can view".</div>';
         });
     }
